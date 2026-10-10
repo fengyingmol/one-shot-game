@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>一发入魂 · 弹射实验室</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<main>
+ <header><a class="brand" href="./">ONE SHOT <span>弹射实验室</span></a><button id="sound" aria-pressed="false">声音：关</button></header>
+ <section class="intro"><div class="eyebrow">小角度，大场面 · PLAYABLE DEMO</div><h1>一发入魂<span>。</span></h1><p>借一面墙，让这一枪多飞一会。</p></section>
+ <section class="game-layout">
+  <div class="arena-wrap"><div class="arena-top"><span id="levelName"></span><span id="counter"></span></div><canvas id="game" width="480" height="600" aria-label="弹射游戏，拖动瞄准，松手开枪"></canvas><div id="result" class="result" hidden><span id="resultTag"></span><h2 id="resultTitle"></h2><p id="resultDesc"></p><button id="resultAction"></button></div><div class="arena-bottom"><span id="stateText">拖动瞄准 · 松手开枪</span><span id="combo">一颗子弹</span></div></div>
+  <aside><div class="section-label">试试这三种爽感</div><nav id="levels"></nav><div class="hint"><span class="section-label">这一关的机会</span><p id="hint"></p></div><div class="legend"><div><i class="dot enemy"></i><span>小怪</span><small>击中续能，子弹穿透</small></div><div><i class="dot shield"></i><span>盾牌怪</span><small>从背后打，或用爆炸</small></div><div><i class="dot barrel"></i><span>炸药桶</span><small>爆炸会引爆附近的桶</small></div></div><button id="retry" class="secondary">↻ 重来这一关 <kbd>R</kbd></button><label class="speed">飞行速度 <select id="speed"><option value="650">清晰</option><option value="800" selected>爽快</option><option value="1000">极速</option></select></label><p class="footnote">瞄准线只预告第一次反弹。<br>失败后保留上一枪轨迹，试着偏一点。</p></aside>
+ </section><footer>无体力 · 无倒计时 · 随时重来<span>01 / 核心手感原型</span></footer>
+</main><script src="game.js"></script></body></html>
