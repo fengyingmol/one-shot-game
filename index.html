@@ -1,12 +1,37 @@
 <!doctype html>
 <html lang="zh-CN">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>一发入魂 · 弹射实验室</title><link rel="stylesheet" href="style.css"></head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#faf5e9"><title>一发入魂 · 涂鸦训练场</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="casual.css"></head>
 <body>
 <main>
- <header><a class="brand" href="./">ONE SHOT <span>弹射实验室</span></a><button id="sound" aria-pressed="false">声音：关</button></header>
- <section class="intro"><div class="eyebrow">小角度，大场面 · PLAYABLE DEMO</div><h1>一发入魂<span>。</span></h1><p>借一面墙，让这一枪多飞一会。</p></section>
- <section class="game-layout">
-  <div class="arena-wrap"><div class="arena-top"><span id="levelName"></span><span id="counter"></span></div><canvas id="game" width="480" height="600" aria-label="弹射游戏，拖动瞄准，松手开枪"></canvas><div id="result" class="result" hidden><span id="resultTag"></span><h2 id="resultTitle"></h2><p id="resultDesc"></p><button id="resultAction"></button></div><div class="arena-bottom"><span id="stateText">拖动瞄准 · 松手开枪</span><span id="combo">一颗子弹</span></div></div>
-  <aside><div class="section-label">试试这三种爽感</div><nav id="levels"></nav><div class="hint"><span class="section-label">这一关的机会</span><p id="hint"></p></div><div class="legend"><div><i class="dot enemy"></i><span>小怪</span><small>击中续能，子弹穿透</small></div><div><i class="dot shield"></i><span>盾牌怪</span><small>从背后打，或用爆炸</small></div><div><i class="dot barrel"></i><span>炸药桶</span><small>爆炸会引爆附近的桶</small></div></div><button id="retry" class="secondary">↻ 重来这一关 <kbd>R</kbd></button><label class="speed">飞行速度 <select id="speed"><option value="650">清晰</option><option value="800" selected>爽快</option><option value="1000">极速</option></select></label><p class="footnote">瞄准线只预告第一次反弹。<br>失败后保留上一枪轨迹，试着偏一点。</p></aside>
- </section><footer>无体力 · 无倒计时 · 随时重来<span>01 / 核心手感原型</span></footer>
+ <header><a class="brand" href="./"><img class="title-art" src="assets/title.png" alt="一发入魂"><span>涂鸦训练场</span></a><button id="sound" aria-pressed="false"><img class="icon" src="assets/icons/volume-up.svg" alt=""><span id="soundLabel">声音：关</span></button></header>
+ <section class="intro"><p>找个角度，让这一枪多飞一会。</p></section>
+ <section class="game-layout" id="gameLayout">
+  <div class="play-column">
+   <div class="arena-wrap"><div class="arena-top"><span id="levelName"></span><div class="arena-stats"><span id="counter"></span><span id="scoreHud">得分 0</span></div></div><canvas id="game" width="600" height="900" aria-label="弹射游戏，拖动瞄准，松手开枪，底部开放"></canvas><div id="result" class="result" hidden><span id="resultTag"></span><h2 id="resultTitle"></h2><div id="resultScore" class="result-score"></div><p id="resultBreakdown"></p><p id="resultDesc"></p><button id="resultAction"></button></div><div class="arena-bottom"><span id="stateText">拖动瞄准 · 松手开枪</span><span id="combo">一颗子弹</span></div></div>
+   <section class="ammo-panel" aria-label="选择子弹"><div id="ammoChoices" class="ammo-choices"></div><p id="ammoSummary"></p></section>
+   <div class="play-actions"><button id="retry"><img class="icon" src="assets/icons/arrow-clockwise.svg" alt="">重试整关</button><button id="openLevels" aria-expanded="false" aria-controls="levelPanel"><img class="icon" src="assets/icons/grid.svg" alt="">关卡</button></div>
+   <button id="viewTrajectory" class="secondary trajectory-button" disabled>查看上一枪轨迹</button>
+  </div>
+  <aside>
+   <details id="levelPanel"><summary>教学关 → 综合挑战</summary><nav id="levels"></nav></details>
+   <details id="helpPanel"><summary>本关提示与元素</summary>
+   <p id="lessonGoal" class="lesson-goal"></p>
+   <div class="hint"><span class="section-label">这一关怎么思考 · <span id="roomSize"></span></span><p id="hint"></p></div>
+   <div class="section-label">本关元素</div><div class="legend">
+    <div data-kind="normal"><i class="dot enemy"></i><span>小怪</span><small>击中续能，子弹穿透</small></div>
+    <div data-kind="helmet"><i class="dot helmet"></i><span>头盔怪</span><small>一枪掉盔，第二枪击倒</small></div>
+    <div data-kind="bomb"><i class="dot bomb"></i><span>炸弹怪</span><small>击倒后小范围爆炸</small></div>
+    <div data-kind="shield"><i class="dot shield"></i><span>盾牌怪</span><small>从背后打，或用爆炸</small></div>
+    <div data-kind="barrel"><i class="dot barrel"></i><span>炸药桶</span><small>触碰就爆，范围更大</small></div>
+    <div data-kind="obstacle"><i class="dot obstacle"></i><span>普通障碍</span><small>两次命中或爆炸破坏</small></div>
+    <div data-kind="brick"><i class="dot brick"></i><span>砖墙</span><small>只能用爆炸破坏</small></div>
+    <div data-kind="iron"><i class="dot iron"></i><span>铁墙</span><small>无法破坏，始终反弹</small></div>
+   </div>
+   <p id="ammoHint"></p>
+   <label class="speed">关卡速度（固定） <select id="speed" disabled><option value="800" selected>标准 · 800</option></select></label>
+   <p class="footnote">有效命中 +10 分，1 秒内连续命中额外加分。<br>底部不反弹，落下的子弹直接消失。<br>瞄准线只预告第一次反弹。<br>上一枪轨迹需点击查看，每次重试默认隐藏。</p>
+   </details>
+   <details id="statsPanel"><summary>本关成绩</summary><section id="comparison" class="comparison"><table><thead><tr><th>记录</th><th>最近击倒</th><th>最佳击倒</th><th>最高分</th><th>次数</th></tr></thead><tbody id="comparisonRows"></tbody></table><p>每关独立记录；刷新清空。下一枪保留场景。</p></section></details>
+  </aside>
+ </section><footer>无体力 · 无倒计时 · 随时重来</footer>
 </main><script src="game.js"></script></body></html>
