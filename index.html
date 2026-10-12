@@ -1,18 +1,19 @@
 <!doctype html>
 <html lang="zh-CN">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#faf5e9"><title>一发入魂 · 涂鸦训练场</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="casual.css"></head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#faf5e9"><title>一发入魂 · 玩具小院</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="casual.css"></head>
 <body>
 <main>
- <header><a class="brand" href="./"><img class="title-art" src="assets/title.png" alt="一发入魂"><span>涂鸦训练场</span></a><button id="sound" aria-pressed="false"><img class="icon" src="assets/icons/volume-up.svg" alt=""><span id="soundLabel">声音：关</span></button></header>
+ <header><a class="brand" href="./"><img class="title-art" src="assets/toy-title.png" alt="一发入魂"><span>玩具小院</span></a><button id="sound" aria-pressed="false"><img class="icon" src="assets/icons/volume-up.svg" alt=""><span id="soundLabel">声音：关</span></button></header>
  <section class="intro"><p>找个角度，让这一枪多飞一会。</p></section>
  <section class="game-layout" id="gameLayout">
   <div class="play-column">
    <div class="arena-wrap"><div class="arena-top"><span id="levelName"></span><div class="arena-stats"><span id="counter"></span><span id="scoreHud">得分 0</span></div></div><canvas id="game" width="600" height="900" aria-label="弹射游戏，拖动瞄准，松手开枪，底部开放"></canvas><div id="result" class="result" hidden><span id="resultTag"></span><h2 id="resultTitle"></h2><div id="resultScore" class="result-score"></div><p id="resultBreakdown"></p><p id="resultDesc"></p><button id="resultAction"></button></div><div class="arena-bottom"><span id="stateText">拖动瞄准 · 松手开枪</span><span id="combo">一颗子弹</span></div></div>
    <section class="ammo-panel" aria-label="选择子弹"><div id="ammoChoices" class="ammo-choices"></div><p id="ammoSummary"></p></section>
-   <div class="play-actions"><button id="retry"><img class="icon" src="assets/icons/arrow-clockwise.svg" alt="">重试整关</button><button id="openLevels" aria-expanded="false" aria-controls="levelPanel"><img class="icon" src="assets/icons/grid.svg" alt="">关卡</button></div>
+   <div class="play-actions"><button id="retry"><img class="icon" src="assets/icons/arrow-clockwise.svg" alt="">重试</button><button id="openLevels" aria-expanded="false" aria-controls="levelPanel"><img class="icon" src="assets/icons/grid.svg" alt="">关卡</button></div>
    <button id="viewTrajectory" class="secondary trajectory-button" disabled>查看上一枪轨迹</button>
   </div>
-  <aside>
+  <aside aria-label="关卡与游戏设置"><button id="closeLevels" aria-label="关闭关卡与设置">返回游戏</button>
+   <details id="audioPanel"><summary>音乐与音效</summary><p id="audioStatus" role="status">点击开启声音</p><div class="audio-toggles"><button id="musicToggle" aria-pressed="false">音乐：关</button><button id="sfxToggle" aria-pressed="false">音效：关</button></div><label class="audio-volume" for="audioVolume">音量<input id="audioVolume" type="range" min="0" max="100" value="55" aria-label="游戏总音量"></label></details>
    <details id="levelPanel"><summary>教学关 → 综合挑战</summary><nav id="levels"></nav></details>
    <details id="helpPanel"><summary>本关提示与元素</summary>
    <p id="lessonGoal" class="lesson-goal"></p>
@@ -34,4 +35,4 @@
    <details id="statsPanel"><summary>本关成绩</summary><section id="comparison" class="comparison"><table><thead><tr><th>记录</th><th>最近击倒</th><th>最佳击倒</th><th>最高分</th><th>次数</th></tr></thead><tbody id="comparisonRows"></tbody></table><p>每关独立记录；刷新清空。下一枪保留场景。</p></section></details>
   </aside>
  </section><footer>无体力 · 无倒计时 · 随时重来</footer>
-</main><script src="game.js"></script></body></html>
+</main><script src="soundtrack.js"></script><script src="game.js"></script><script src="audio.js"></script></body></html>
