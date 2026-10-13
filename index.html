@@ -1,9 +1,13 @@
 <!doctype html>
 <html lang="zh-CN">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#faf5e9"><title>一发入魂 · 玩具小院</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="casual.css"></head>
-<body>
-<main>
- <header><a class="brand" href="./"><img class="title-art" src="assets/toy-title.png" alt="一发入魂"><span>玩具小院</span></a><button id="sound" aria-pressed="false"><img class="icon" src="assets/icons/volume-up.svg" alt=""><span id="soundLabel">声音：关</span></button></header>
+<body class="loading">
+<style>
+body.loading main{visibility:hidden;pointer-events:none}#loadingScreen{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:#faf5e9;color:#34344b;font-family:system-ui,sans-serif}#loadingScreen[hidden]{display:none}.loading-card{width:min(280px,80vw);text-align:center}.loading-mark{font-size:56px}.loading-card h1{font-size:28px;margin:16px 0 8px}.loading-card progress{width:100%;height:18px;accent-color:#8f79de}.loading-card p{font-size:14px;line-height:1.6}.loading-card button{padding:12px 28px;background:#ffe17c;border:2px solid #34344b;border-radius:16px;color:#34344b;font-size:16px}.loading-card button[hidden]{display:none}
+</style>
+<section id="loadingScreen" aria-label="加载游戏"><div class="loading-card"><div class="loading-mark" aria-hidden="true">🎯</div><h1>一发入魂</h1><p>正在准备玩具小院</p><progress id="loadingProgress" max="15" value="0" aria-label="游戏素材加载进度"></progress><p id="loadingStatus" role="status">准备加载…</p><button id="loadingRetry" hidden>重新加载</button><noscript>请开启浏览器 JavaScript 后重新打开游戏。</noscript></div></section>
+<main inert>
+ <header><a class="brand" href="./"><img class="title-art" data-asset="toy-title" alt="一发入魂"><span>玩具小院</span></a><button id="sound" aria-pressed="false"><img class="icon" src="assets/icons/volume-up.svg" alt=""><span id="soundLabel">声音：关</span></button></header>
  <section class="intro"><p>找个角度，让这一枪多飞一会。</p></section>
  <section class="game-layout" id="gameLayout">
   <div class="play-column">

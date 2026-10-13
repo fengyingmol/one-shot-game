@@ -1,5 +1,9 @@
 # 玩具小院素材记录
 
+## 运行素材无损压缩（2026-10-13，0.22本地）
+
+新增15张同名`.webp`运行副本：courtyard、player-poses、monster、helmet-v3、shield-v3、barrel、wood、wood-damaged、brick、iron-tile、title、normal、fast、explosive、scatter（均以`toy-`为前缀）。使用本地Sharp的`webp({lossless:true,effort:6})`机械编码，不重新生成、不缩小、不重绘；逐像素验证尺寸、透明度及可见像素一致。运行下载量由11,956,299降至7,212,346字节。PNG原件保留，加载器第三次尝试兼容回退PNG。Sharp仅安装于被忽略的`.local-tools/`，网页运行无需Node依赖或构建。
+
 ## 半碎裂木箱（2026-10-13，0.19本地）
 
 `toy-wood-damaged.png`：1254×1254透明PNG，内置 imagegen 基于原 `toy-wood.png` 生成。原素材保留；生成结果复制到本目录，未压缩、未重绘。`drawTerrain` 在木障碍 `hp=1` 时等比平铺此图，`hp=2` 仍显示完整木箱。去掉程序绘制裂缝与缺口；剩余框架仍代表阻挡状态，视觉空隙不改变矩形碰撞。

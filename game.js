@@ -6,7 +6,37 @@
  const $=id=>document.getElementById(id);
  // Art changes presentation only; all collisions remain in the original flat room.
  const art={};
- if(typeof Image!=='undefined')for(const [key,file] of Object.entries({courtyard:'toy-courtyard',player:'toy-player-poses',monster:'toy-monster',helmet:'toy-helmet-v3',shield:'toy-shield-v3',barrel:'toy-barrel',obstacle:'toy-wood',woodDamaged:'toy-wood-damaged',brick:'toy-brick',iron:'toy-iron-tile'})){const img=new Image();img.src=`assets/${file}.png`;art[key]=img;}
+ const artFiles={courtyard:'toy-courtyard',player:'toy-player-poses',monster:'toy-monster',helmet:'toy-helmet-v3',shield:'toy-shield-v3',barrel:'toy-barrel',obstacle:'toy-wood',woodDamaged:'toy-wood-damaged',brick:'toy-brick',iron:'toy-iron-tile'};
+ let assetsReady=typeof Image==='undefined';
+ if(!assetsReady)for(const key of Object.keys(artFiles))art[key]=new Image();
+ // Count decoded assets, not estimated download bytes. Keep the game gated on failure.
+ function prepareAssets(){
+  if(assetsReady)return;
+  const jobs=[...Object.entries(artFiles).map(([key,file])=>({img:art[key],file})),...Array.from(document.querySelectorAll('img[data-asset]'),img=>({img,file:img.dataset.asset}))];
+  const progress=$('loadingProgress'),status=$('loadingStatus'),retry=$('loadingRetry'),main=document.querySelector('main');
+  let running=false;
+  const completed=()=>jobs.filter(job=>job.done).length;
+  const report=()=>{progress.max=jobs.length;progress.value=completed();status.textContent=`素材准备 ${completed()} / ${jobs.length} · ${Math.round(completed()/jobs.length*100)}%`;};
+  const fetchImage=(job,attempt)=>new Promise((resolve,reject)=>{
+   const img=job.img;let finished=false;
+   const finish=error=>{if(finished)return;finished=true;clearTimeout(timer);img.onload=img.onerror=null;error?reject(error):resolve();};
+   const timer=setTimeout(()=>finish(new Error('timeout')),45000);
+   img.onload=async()=>{try{if(img.decode)await img.decode();if(!img.naturalWidth)throw new Error('empty');finish();}catch(error){finish(error);}};
+   img.onerror=()=>finish(new Error('image'));
+   // The third attempt is the original PNG, also a fallback for older WebP decoders.
+   img.src=`assets/${job.file}.${attempt===2?'png':'webp'}${attempt===1?`?retry=${Date.now()}`:''}`;
+  });
+  async function run(){
+   if(running)return;running=true;retry.hidden=true;report();
+   await Promise.all(jobs.filter(job=>!job.done).map(async job=>{
+    for(let attempt=0;attempt<3;attempt++)try{await fetchImage(job,attempt);job.done=true;report();return;}catch{/* Retry only this failed asset; keep all successful downloads. */}
+   }));
+   running=false;
+   if(completed()!==jobs.length){status.textContent=`还有 ${jobs.length-completed()} 个素材未加载成功，请检查网络后重试。`;retry.hidden=false;return;}
+   assetsReady=true;dragging=false;main.inert=false;document.body.classList.remove('loading');syncCanvas();draw();$('loadingScreen').hidden=true;
+  }
+  retry.onclick=run;run();
+ }
  const ready=img=>img&&img.complete&&img.naturalWidth>0;
  let recoilUntil=0;
  let renderScale=1;
@@ -87,7 +117,7 @@
  function explode(barrel,bullet){if(!barrel.alive)return;barrel.alive=false;state.barrelExplosions++;blast(barrel.x,barrel.y,102,bullet);}
  function detonate(bullet){if(!bullet.explosionReady)return;bullet.explosionReady=false;bullet.alive=false;state.explosions++;blast(bullet.x,bullet.y,64,bullet);state.labels.push({x:bullet.x,y:bullet.y-25,text:'爆炸弹引爆！',life:.9});}
  function bounce(x,y,bullet){if(bullet)bullet.spreading=false;state.bounces++;state.rings.push({x,y,r:0,max:17,life:.16});tone('bounce',1+(state.bounces%4)*.03);}
- function shoot(){if(state.phase!=='aim'||state.inventory[selectedAmmo]<=0)return false;state.inventory[selectedAmmo]--;state.shotsUsed++;state.shotLog.push(selectedAmmo);stats.shots++;state.phase='flying';state.ammo=selectedAmmo;state.comboCount=0;state.lastHitTime=-Infinity;showPrevious=false;const type=ammoTypes[selectedAmmo],speed=800*type.speed,angle=Math.atan2(aim.y,aim.x);state.bullets=Array.from({length:type.count},(_,i)=>{const position=type.count>1?i/(type.count-1)-.5:0,spreadAngle=position*(type.startSpread||0),a=angle+spreadAngle;return {id:i,x:origin.x,y:origin.y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,r:4,energy:type.energy,maxEnergy:type.maxEnergy,recharge:type.recharge,duration:type.duration,elapsed:0,spreadAngle,targetSpread:position*(type.spread||0),startSpread:spreadAngle,spreadTime:type.spreadTime||0,spreading:!!type.spread,shieldLock:0,armorPiercing:!!type.armorPiercing,hitEnemies:new Set(),hitWalls:new Set(),color:type.color,alive:true,explosionReady:selectedAmmo==='explosive'};});state.bullet=state.bullets[0];refreshAmmo();$('stateText').textContent=`第 ${state.shotsUsed} 枪 · ${type.count>1?'扇形散射':'正在飞行'}`;tone({normal:'shot',fast:'fast',scatter:'scatter',explosive:'explosiveShot'}[selectedAmmo]);return true;}
+ function shoot(){if(!assetsReady||state.phase!=='aim'||state.inventory[selectedAmmo]<=0)return false;state.inventory[selectedAmmo]--;state.shotsUsed++;state.shotLog.push(selectedAmmo);stats.shots++;state.phase='flying';state.ammo=selectedAmmo;state.comboCount=0;state.lastHitTime=-Infinity;showPrevious=false;const type=ammoTypes[selectedAmmo],speed=800*type.speed,angle=Math.atan2(aim.y,aim.x);state.bullets=Array.from({length:type.count},(_,i)=>{const position=type.count>1?i/(type.count-1)-.5:0,spreadAngle=position*(type.startSpread||0),a=angle+spreadAngle;return {id:i,x:origin.x,y:origin.y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,r:4,energy:type.energy,maxEnergy:type.maxEnergy,recharge:type.recharge,duration:type.duration,elapsed:0,spreadAngle,targetSpread:position*(type.spread||0),startSpread:spreadAngle,spreadTime:type.spreadTime||0,spreading:!!type.spread,shieldLock:0,armorPiercing:!!type.armorPiercing,hitEnemies:new Set(),hitWalls:new Set(),color:type.color,alive:true,explosionReady:selectedAmmo==='explosive'};});state.bullet=state.bullets[0];refreshAmmo();$('stateText').textContent=`第 ${state.shotsUsed} 枪 · ${type.count>1?'扇形散射':'正在飞行'}`;tone({normal:'shot',fast:'fast',scatter:'scatter',explosive:'explosiveShot'}[selectedAmmo]);return true;}
  function finish(){if(state.phase!=='flying')return;state.phase='settling';state.settle=.45;}
  function showResult(){
   const left=state.enemies.filter(e=>e.alive).length,won=left===0;
@@ -174,15 +204,16 @@
   const x=origin.x+dx*t,y=origin.y+dy*t;ctx.save();ctx.setLineDash([5,7]);line(origin.x,origin.y,x,y,'#72608790',1.5);line(x,y,x+(axis==='x'?-dx:dx)*85,y+(axis==='y'?-dy:dy)*85,'#72608760',1.5);ctx.setLineDash([]);circle(x,y,3,'#826799');ctx.restore();}
  function point(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
  function setAim(e){const p=point(e),dx=p.x-origin.x,dy=Math.min(-30,p.y-origin.y),len=Math.hypot(dx,dy);aim={x:dx/len,y:dy/len};}
- canvas.addEventListener('pointerdown',e=>{if(state.phase!=='aim')return;dragging=true;canvas.setPointerCapture(e.pointerId);setAim(e);});canvas.addEventListener('pointermove',e=>{if(dragging)setAim(e);});canvas.addEventListener('pointerup',e=>{if(!dragging)return;setAim(e);dragging=false;shoot();});canvas.addEventListener('pointercancel',()=>dragging=false);
+ canvas.addEventListener('pointerdown',e=>{if(!assetsReady||state.phase!=='aim')return;dragging=true;canvas.setPointerCapture(e.pointerId);setAim(e);});canvas.addEventListener('pointermove',e=>{if(dragging)setAim(e);});canvas.addEventListener('pointerup',e=>{if(!dragging)return;setAim(e);dragging=false;shoot();});canvas.addEventListener('pointercancel',()=>dragging=false);
  $('retry').onclick=()=>{tone('ui');load(state.index,true);};$('resultAction').onclick=()=>{tone('ui');const won=!state.enemies.some(e=>e.alive);load(won?nextLevel(state.index):state.index,!won);};document.addEventListener('keydown',e=>{if(e.key.toLowerCase()==='r'&&e.target.tagName!=='SELECT')load(state.index,true);});
  $('openLevels').onclick=()=>{const panel=$('levelPanel');panel.open=!panel.open;$('openLevels').setAttribute('aria-expanded',String(panel.open));if(panel.open)panel.scrollIntoView?.({behavior:'smooth',block:'nearest'});};
  $('levelPanel').addEventListener('toggle',()=>{$('openLevels').setAttribute('aria-expanded',String($('levelPanel').open));if($('levelPanel').open)$('closeLevels')?.focus?.();});
  if($('closeLevels'))$('closeLevels').onclick=()=>{$('levelPanel').open=false;$('openLevels').focus?.();};
  document.addEventListener('keydown',e=>{if(!$('levelPanel').open)return;if(e.key==='Escape'){$('levelPanel').open=false;$('openLevels').focus?.();}if(e.key==='Tab'){const controls=Array.from(document.querySelectorAll('aside button,aside summary,aside input')).filter(el=>!el.disabled&&el.getClientRects().length),first=controls[0],last=controls[controls.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}});
  levels.forEach((l,i)=>{if(i===0||l.group!==levels[i-1].group){const title=document.createElement('h3');title.className='level-group-title';title.dataset.group=l.group;title.innerHTML=`<span>${levelGroups[l.group].name}</span><small>${groupCounts[l.group]} 关</small>`;$('levels').append(title);}const b=document.createElement('button');b.className='level-button';b.dataset.levelIndex=String(i);b.dataset.group=l.group;b.innerHTML=`<span class="number">${String(l.number).padStart(2,'0')}</span><span><strong>${l.name.split(' · ')[1]}</strong><small>${l.sub}</small></span>`;b.onclick=()=>{load(i);$('levelPanel').open=false;};$('levels').append(b);});
- Object.entries(ammoTypes).forEach(([key,type])=>{const b=document.createElement('button');b.className='ammo-button';b.dataset.ammo=key;b.style.setProperty('--bullet-color',type.color);b.innerHTML=`<img class="ammo-icon" src="assets/toy-${key}.png" alt=""><span><strong>${{normal:'普通',fast:'穿甲',explosive:'爆炸',scatter:'散弹'}[key]}</strong><small>${type.sub}</small><b class="ammo-count" id="stock-${key}"></b></span>`;b.onclick=()=>selectAmmo(key);$('ammoChoices').append(b);});
+ Object.entries(ammoTypes).forEach(([key,type])=>{const b=document.createElement('button');b.className='ammo-button';b.dataset.ammo=key;b.style.setProperty('--bullet-color',type.color);b.innerHTML=`<img class="ammo-icon" data-asset="toy-${key}" alt=""><span><strong>${{normal:'普通',fast:'穿甲',explosive:'爆炸',scatter:'散弹'}[key]}</strong><small>${type.sub}</small><b class="ammo-count" id="stock-${key}"></b></span>`;b.onclick=()=>selectAmmo(key);$('ammoChoices').append(b);});
  load(Math.max(0,levels.findIndex(l=>l.group==='formal')));let lastShotCount=stats.shots;function frame(time){let dt=Math.min(.032,(time-lastTime)/1000||.016);lastTime=time;if(lastShotCount!==stats.shots){lastShotCount=stats.shots;recoilUntil=state.time+.12;}if(slow>0){slow-=dt;dt*=.35;}update(dt);draw();requestAnimationFrame(frame);}requestAnimationFrame(frame);
+ prepareAssets();
  // Small diagnostic surface for repeatable shot and physics verification.
- window.demo={get state(){return state;},get stage(){return {W,H,origin,bounds};},get playerRig(){return playerRig();},shieldGeometry,comparison,levels,ammoTypes,scoreRules,selectAmmo,load,shootAt(x,y){if(state.phase!=='aim')return;const dx=x-origin.x,dy=Math.min(-30,y-origin.y),length=Math.hypot(dx,dy);aim={x:dx/length,y:dy/length};shoot();},step:update,stats};
+ window.demo={get assetsReady(){return assetsReady;},get state(){return state;},get stage(){return {W,H,origin,bounds};},get playerRig(){return playerRig();},shieldGeometry,comparison,levels,ammoTypes,scoreRules,selectAmmo,load,shootAt(x,y){if(state.phase!=='aim')return;const dx=x-origin.x,dy=Math.min(-30,y-origin.y),length=Math.hypot(dx,dy);aim={x:dx/length,y:dy/length};shoot();},step:update,stats};
 })();
