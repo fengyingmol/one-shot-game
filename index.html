@@ -14,17 +14,17 @@
   </div>
   <aside aria-label="关卡与游戏设置"><button id="closeLevels" aria-label="关闭关卡与设置">返回游戏</button>
    <details id="audioPanel"><summary>音乐与音效</summary><p id="audioStatus" role="status">点击开启声音</p><div class="audio-toggles"><button id="musicToggle" aria-pressed="false">音乐：关</button><button id="sfxToggle" aria-pressed="false">音效：关</button></div><label class="audio-volume" for="audioVolume">音量<input id="audioVolume" type="range" min="0" max="100" value="55" aria-label="游戏总音量"></label></details>
-   <details id="levelPanel"><summary>教学关 → 综合挑战</summary><nav id="levels"></nav></details>
+   <details id="levelPanel"><summary>选择关卡</summary><nav id="levels" aria-label="教学、正式与测试关卡"></nav></details>
    <details id="helpPanel"><summary>本关提示与元素</summary>
    <p id="lessonGoal" class="lesson-goal"></p>
    <div class="hint"><span class="section-label">这一关怎么思考 · <span id="roomSize"></span></span><p id="hint"></p></div>
    <div class="section-label">本关元素</div><div class="legend">
     <div data-kind="normal"><i class="dot enemy"></i><span>小怪</span><small>击中续能，子弹穿透</small></div>
-    <div data-kind="helmet"><i class="dot helmet"></i><span>头盔怪</span><small>一枪掉盔，第二枪击倒</small></div>
+    <div data-kind="helmet"><i class="dot helmet"></i><span>头盔怪</span><small>普通两击；穿甲或爆炸一击</small></div>
     <div data-kind="bomb"><i class="dot bomb"></i><span>炸弹怪</span><small>击倒后小范围爆炸</small></div>
     <div data-kind="shield"><i class="dot shield"></i><span>盾牌怪</span><small>从背后打，或用爆炸</small></div>
     <div data-kind="barrel"><i class="dot barrel"></i><span>炸药桶</span><small>触碰就爆，范围更大</small></div>
-    <div data-kind="obstacle"><i class="dot obstacle"></i><span>普通障碍</span><small>两次命中或爆炸破坏</small></div>
+    <div data-kind="obstacle"><i class="dot obstacle"></i><span>普通障碍</span><small>普通两击；穿甲或爆炸一击</small></div>
     <div data-kind="brick"><i class="dot brick"></i><span>砖墙</span><small>只能用爆炸破坏</small></div>
     <div data-kind="iron"><i class="dot iron"></i><span>铁墙</span><small>无法破坏，始终反弹</small></div>
    </div>

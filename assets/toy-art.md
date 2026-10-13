@@ -1,5 +1,15 @@
 # 玩具小院素材记录
 
+## 半碎裂木箱（2026-10-13，0.19本地）
+
+`toy-wood-damaged.png`：1254×1254透明PNG，内置 imagegen 基于原 `toy-wood.png` 生成。原素材保留；生成结果复制到本目录，未压缩、未重绘。`drawTerrain` 在木障碍 `hp=1` 时等比平铺此图，`hp=2` 仍显示完整木箱。去掉程序绘制裂缝与缺口；剩余框架仍代表阻挡状态，视觉空隙不改变矩形碰撞。
+
+生成源：`exec-b179ba2e-da3d-4b85-80e8-472c53a38564.png`。提示词全文如下：
+
+```text
+Use case: precise-object-edit. Asset type: transparent damaged wooden obstacle tile for a casual 2.5D mobile game. Input image: the existing honey-gold wooden crate tile is the edit target and exact style reference. Generate its half-broken damage state after one bullet hit, NOT fully destroyed: preserve the same square framing, front-facing near-orthographic camera, rounded toy-like 3D wood, golden warm color, four gray rivets, upper-left soft lighting, and original overall square silhouette. The diagonal reinforcing plank must be visibly snapped around the middle into two jagged pieces with exposed pale wood fibers; two vertical interior planks split, with a small irregular dark see-through gap at their broken center. Some edges have chipped splinters, a tiny loose fragment still attached. Retain at least 80 percent of the solid crate so this still reads as a blocking obstacle with one health left. This must look physically broken with dimensional broken pieces and rough wooden ends, not black zigzag lines painted over intact wood. Keep each broken piece aligned within the original tile bounds; no flying debris outside the square. Fill nearly the full square canvas like the supplied original with only a tiny transparent padding, making it usable as a repeated 20px tile without stretching. Genuinely transparent background and see-through holes, no white/checkerboard backdrop, no ground, no cast floor shadow, no UI, no text, no labels, no watermark. One damaged tile only.
+```
+
 日期：2026-10-12。使用内置图像生成，未使用 CLI / 外部素材库。素材原图保留；源图与独立裁片均为 PNG，没有有损压缩。
 
 ## 方向与参考

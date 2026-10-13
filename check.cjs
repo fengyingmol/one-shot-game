@@ -9,7 +9,7 @@ const enemy=(x,y,type='normal',id=0)=>({id,x,y,r:type==='shield'?23:18,type,aliv
 const run=()=>{let frames=0;while(demo.state.phase==='flying'&&frames++<1200)demo.step(.008);assert.ok(frames<1200,'Shot must terminate');demo.step(1);assert.equal(demo.state.phase,'result');};
 function singleAmmo(type,index=CH){demo.load(index);for(const key of Object.keys(demo.ammoTypes))demo.state.inventory[key]=key===type?1:0;demo.selectAmmo(type);}
 function fire(type='normal',level=CH,angle=0){singleAmmo(type,level);const a=angle*Math.PI/180;demo.shootAt(origin.x+Math.sin(a)*400,origin.y-Math.cos(a)*400);return demo.state.bullet;}
-assert.ok(W>480&&H>600);assert.equal(demo.state.index,0);
+assert.ok(W>480&&H>600);assert.equal(demo.state.index,demo.levels.findIndex(l=>l.group==='formal'));
 for(const type of Object.keys(demo.ammoTypes)){const b=fire(type);demo.state.enemies=unreachable();demo.state.barrels=[];demo.state.walls=[];demo.state.bullets=[b];b.x=origin.x;b.y=bounds.bottom-1;b.vx=0;b.vy=800;demo.step(.008);assert.equal(b.alive,false);assert.ok(b.vy>0);assert.equal(b.exitReason,'bottom');assert.equal(demo.state.dropped,1);assert.equal(demo.state.bounces,0);assert.equal(demo.state.explosions,0);assert.equal(demo.state.phase,'settling');demo.step(1);assert.equal(demo.state.phase,'result');}
 for(const edge of ['left','right','top']){const b=fire();demo.state.enemies=unreachable();demo.state.barrels=[];demo.state.walls=[];b.x=edge==='left'?bounds.left+5:edge==='right'?bounds.right-5:origin.x;b.y=edge==='top'?bounds.top+5:500;b.vx=edge==='left'?-800:edge==='right'?800:0;b.vy=edge==='top'?-800:0;demo.step(.008);assert.equal(demo.state.bounces,1);assert.equal(b.alive,true);}
 for(const target of ['normal','shield','barrel']){singleAmmo('explosive');demo.state.walls=[];demo.state.enemies=unreachable();demo.state.barrels=[];const y=origin.y-120;if(target==='barrel')demo.state.barrels=[{id:0,x:origin.x,y,r:14,alive:true},{id:1,x:origin.x,y:y-90,r:14,alive:true}];else{demo.state.enemies.push(enemy(origin.x,y,target));demo.state.enemies.push(enemy(origin.x+40,y,'normal',1));}demo.shootAt(origin.x,100);run();assert.equal(demo.state.explosions,1);assert.equal(demo.state.bullet.alive,false);const {x,y:by}=demo.state.bullet,trail=demo.state.segments.length;demo.step(.1);assert.equal(demo.state.bullet.x,x);assert.equal(demo.state.bullet.y,by);assert.equal(demo.state.segments.length,trail);if(target==='barrel')assert.equal(demo.state.barrels.filter(b=>b.alive).length,0);else assert.equal(demo.state.kills,2);}
@@ -24,6 +24,24 @@ assert.ok(benchmark.some(r=>r.best===18),'Challenge must have a full-clear route
 console.log(JSON.stringify({checks:'PASS: larger arena, open bottom for all ammo, no exit blast, side/top reflection, consumed explosive, shield, ratios, reset, fixed challenge and efficiency records',benchmark},null,2));
 
 function targetRoom(type='normal'){const b=fire(type);demo.state.walls=[];demo.state.barrels=[];demo.state.enemies=unreachable();return b;}
+// Spread grows during flight, is symmetric around aim, and never overrides a bounce.
+for(const degrees of [-35,0,35]){
+ fire('scatter',CH,degrees);demo.state.enemies=unreachable();demo.state.walls=[];demo.state.barrels=[];
+ const angle=(-90+degrees)*Math.PI/180,offsets=()=>demo.state.bullets.map(b=>Math.atan2(b.vy,b.vx)-angle);
+ const initial=offsets();assert.ok(initial.every(a=>Math.abs(a)<=2*Math.PI/180+1e-9));
+ assert.ok(demo.state.bullets.every(b=>b.vy<0));demo.step(.05);const near=offsets();
+ demo.step(.075);const middle=offsets();demo.step(.126);const far=offsets();
+ assert.ok(Math.abs(initial[0])<Math.abs(near[0])&&Math.abs(near[0])<Math.abs(middle[0])&&Math.abs(middle[0])<Math.abs(far[0]));
+ for(let i=0;i<8;i++){assert.ok(Math.abs(far[i]+far[7-i])<1e-9);assert.ok(Math.abs(Math.hypot(demo.state.bullets[i].vx,demo.state.bullets[i].vy)-720)<1e-8);}
+ assert.ok(Math.abs(far[7]-24*Math.PI/180)<1e-9);assert.ok(demo.state.bullets.every(b=>!b.spreading&&b.alive));
+ assert.equal(demo.state.shotsUsed,1);assert.equal(demo.state.inventory.scatter,0);assert.equal(demo.state.dropped,0);
+}
+{
+ const pellet=targetRoom('scatter');demo.state.bullets=[pellet];pellet.x=bounds.left+5;pellet.vx=-720;pellet.vy=0;
+ demo.step(.008);assert.ok(pellet.vx>0);assert.equal(pellet.spreading,false);const direction=Math.atan2(pellet.vy,pellet.vx);
+ demo.step(.06);assert.ok(Math.abs(Math.atan2(pellet.vy,pellet.vx)-direction)<1e-9,'Early bounce must stop spread steering');
+}
+console.log('PASS: progressive symmetric 4-to-48 degree forward fan, aim rotation, constant speed, one ammo charge, no rear pellets, early bounce direction retained');
 function helmetTarget(x=origin.x,y=origin.y-100,id=0){return {...enemy(x,y,'helmet',id),hp:2};}
 let b=targetRoom(),h=helmetTarget();demo.state.enemies.push(h);const startEnergy=b.energy;demo.step(.16);
 assert.equal(h.hp,1);assert.equal(h.alive,true);assert.equal(demo.state.kills,0);assert.equal(demo.state.helmetBreaks,1);assert.equal(demo.state.helmets.length,1);assert.equal(demo.state.bounces,0);assert.ok(Math.abs(b.energy-(startEnergy-.16))<1e-9,'Breaking helmet must not recharge');assert.ok(b.vy<0,'Helmet never reflects');
@@ -56,7 +74,22 @@ for(const inside of [false,true]){const room=shieldRoom();room.bullet.x=room.fac
 console.log('PASS: shield sprite collider, front/side/grazing edges, outside misses, rear body vulnerability and explosion bypass');
 
 function terrainRoom(type,ammo='normal'){const bullet=targetRoom(ammo);const w={id:0,type,x:origin.x-20,y:origin.y-100,w:40,h:22,hp:type==='obstacle'?2:type==='brick'?1:Infinity,alive:true};demo.state.walls=[w];return {bullet,w};}
-for(const ammo of ['normal','fast','scatter']){const room=terrainRoom('obstacle',ammo);demo.state.bullets=[room.bullet];demo.step(.13);assert.equal(room.w.hp,1);assert.equal(room.w.alive,true);assert.ok(room.bullet.vy>0,'First impact reflects');assert.equal(demo.state.terrainDestroyed,0);assert.equal(demo.state.score,0);demo.step(.005);assert.equal(room.w.hp,1,'Continuous contact must not apply another hit');room.bullet.x=origin.x;room.bullet.y=room.w.y+room.w.h+8;room.bullet.vx=0;room.bullet.vy=-800;demo.step(.008);assert.equal(room.w.alive,false);assert.equal(demo.state.terrainDestroyed,1);assert.ok(room.bullet.vy<0,'Breaking hit passes through');assert.equal(demo.state.score,0);}
+for(const ammo of ['normal','scatter']){const room=terrainRoom('obstacle',ammo);demo.state.bullets=[room.bullet];demo.step(.13);assert.equal(room.w.hp,1);assert.equal(room.w.alive,true);assert.ok(room.bullet.vy>0,'First impact reflects');assert.equal(demo.state.terrainDestroyed,0);assert.equal(demo.state.score,0);demo.step(.005);assert.equal(room.w.hp,1,'Continuous contact must not apply another hit');room.bullet.x=origin.x;room.bullet.y=room.w.y+room.w.h+8;room.bullet.vx=0;room.bullet.vy=-800;demo.step(.008);assert.equal(room.w.alive,false);assert.equal(demo.state.terrainDestroyed,1);assert.ok(room.bullet.vy<0,'Breaking hit passes through');assert.equal(demo.state.score,0);}
+// One armor-piercing round continues through multiple wooden walls and helmets.
+{
+ const room=terrainRoom('obstacle','fast'),bullet=room.bullet,start=bullet.energy;
+ demo.state.walls.push({...room.w,id:1,y:origin.y-180});
+ const first=helmetTarget(origin.x,origin.y-140,0),second=helmetTarget(origin.x,origin.y-230,1);
+ demo.state.enemies.push(first,second);demo.step(.22);
+ assert.equal(first.alive,false);assert.equal(second.alive,false);assert.equal(demo.state.terrainDestroyed,2);
+ assert.ok(demo.state.walls.every(w=>!w.alive&&w.hp===0));assert.equal(demo.state.bounces,0);
+ assert.ok(bullet.alive&&bullet.vy<0);assert.equal(bullet.vy,-1200);assert.equal(demo.state.helmetBreaks,2);
+ assert.equal(demo.state.hitCount,2);assert.equal(demo.state.kills,2);assert.equal(demo.state.score,25);
+ assert.ok(Math.abs(bullet.energy-(start-.22+2*bullet.recharge))<1e-9,'Only kills recharge; wood does not');
+ demo.step(.008);assert.equal(demo.state.hitCount,2,'No duplicate score after piercing');
+ assert.equal(demo.ammoTypes.fast.name,'穿甲子弹');
+ console.log('PASS: armor piercing through multiple intact wood walls and helmets, unchanged speed/energy, single hit and recharge per kill');
+}
 for(const type of ['brick','iron'])for(const ammo of ['normal','fast','scatter']){const room=terrainRoom(type,ammo);demo.state.bullets=[room.bullet];for(let hit=0;hit<3;hit++){room.bullet.x=origin.x;room.bullet.y=room.w.y+room.w.h+8;room.bullet.vx=0;room.bullet.vy=-800;demo.step(.008);assert.equal(room.w.alive,true);assert.ok(room.bullet.vy>0);}assert.equal(demo.state.terrainDestroyed,0);}
 for(const type of ['obstacle','brick','iron']){const room=terrainRoom(type,'explosive');demo.step(.13);assert.equal(room.w.alive,type==='iron');assert.equal(room.bullet.alive,type==='iron');assert.equal(demo.state.explosions,type==='iron'?0:1);assert.equal(demo.state.score,0);}
 const room=terrainRoom('obstacle','scatter');const pellet2=demo.state.bullets[1];for(const pellet of [room.bullet,pellet2]){pellet.x=origin.x;pellet.y=room.w.y+room.w.h+8;pellet.vx=0;pellet.vy=-720;}demo.state.bullets=[room.bullet,pellet2];demo.step(.008);assert.equal(room.w.alive,false,'Different pellets can break obstacle');assert.equal(demo.state.terrainDestroyed,1);
