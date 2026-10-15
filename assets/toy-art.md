@@ -1,14 +1,18 @@
 # 玩具小院素材记录
 
+## 运行WebP首进体积优化（2026-10-15）
+
+当前19个实际引用的运行WebP以Pillow WebP quality 80 / method 3重新编码；总量从11,505,968降至1,861,338字节，减少83.8%。所有图像尺寸保持原值，透明图保留alpha通道；原始PNG不改，继续作为生成源与加载失败回退。照片 / 透明角色的运行图改为有损WebP，视觉检查以真实游戏画面为准，不能再以PNG与WebP像素完全一致作为要求。首关及界面关键图片（庭院、装饰、玩家姿势、普通怪、标题和四种弹药图标）共约1,171,884字节；其它关卡图在入场后预载，并在切关前确认目标素材已就绪。
+
 ## 草坪庭院与木石材质（2026-10-15，0.42本地）
 
 内置imagegen按原图编辑，不是CLI。庭院参考toy-courtyard-satin-v2.png，浅石材参考toy-brick-satin-v2.png，深石材参考toy-iron-satin-v2.png。保留暖左上光，木纹及受损木纹复用。
 
 | 项目素材（PNG / WebP） | 生成源文件 | 运行PNG尺寸 / 字节 | WebP字节 |
 | --- | --- | --- | --- |
-| assets/toy-courtyard-lawn-v1 | exec-7f1b360d-24dc-4d10-9544-165fc31e63df.png | 1024×1536 / 3394617 | 2189882 |
-| assets/toy-limestone-v1 | exec-50f5f166-9410-41f0-9e19-1283d8f64816.png | 627×627 / 994134 | 506690 |
-| assets/toy-basalt-v1 | exec-13ff67bb-1ed0-421f-8863-30c5614b8c43.png | 627×627 / 966261 | 523670 |
+| assets/toy-courtyard-lawn-v1 | exec-7f1b360d-24dc-4d10-9544-165fc31e63df.png | 1024×1536 / 3394617 | 332900 |
+| assets/toy-limestone-v1 | exec-50f5f166-9410-41f0-9e19-1283d8f64816.png | 627×627 / 994134 | 70296 |
+| assets/toy-basalt-v1 | exec-13ff67bb-1ed0-421f-8863-30c5614b8c43.png | 627×627 / 966261 | 79234 |
 
 生成源目录：C:/Users/LENOVO/.codex/generated_images/01a0d233-627f-7be3-8ce8-882181e1a80f/。两石材原图1254×1254保存在assets/toy-limestone-v1-source.png与assets/toy-basalt-v1-source.png；运行图仅用System.Drawing高质量双三次等比归一到627，不重画 / 修色 / 裁切造型。Pillow仅无损编码，运行PNG / WebP完整RGBA一致。三份运行WebP共3,220,242字节；石材归一避免下载无必要的大纹理，旧素材保留。
 

@@ -4,20 +4,22 @@
  let W=600,H=900;
  const origin={x:300,y:816},bounds={left:18,right:582,top:18,bottom:882};
  const $=id=>document.getElementById(id);
+ const now=()=>typeof performance!=='undefined'?performance.now():Date.now();
  // Art changes presentation only; all collisions remain in the original flat room.
  const art={};
  const artFiles={courtyard:'toy-courtyard-lawn-v1',gardenDecor:'toy-garden-decor-v1',player:'toy-player-poses',monster:'toy-bomb-satin-v1',normalMonster:'toy-normal-sculpt-v2',helmet:'toy-windup-cover-v1',helmetMonster:'toy-windup-armored-v1',helmetBare:'toy-windup-bare-v1',shield:'toy-shield-peek-v1',barrel:'toy-barrel',obstacle:'toy-wood-satin-v2',woodDamaged:'toy-wood-damaged-satin-v2',brick:'toy-limestone-v1',iron:'toy-basalt-v1'};
- let assetsReady=typeof Image==='undefined';
- let gameEntered=assetsReady;
+ let assetsReady=typeof Image==='undefined',allAssetsReady=assetsReady,initialReadyAt=assetsReady?now():0,gameEntered=assetsReady;
+ let ensureLevelAssets=()=>Promise.resolve(true),showLevelLoading=()=>{};
  if(!assetsReady)for(const key of Object.keys(artFiles))art[key]=new Image();
- // Count decoded assets, not estimated download bytes. Keep the game gated on failure.
+ // Gate on first-level art and visible UI; defer art used only by later levels.
  function prepareAssets(){
   if(assetsReady)return;
-  const jobs=[...Object.entries(artFiles).map(([key,file])=>({img:art[key],file})),...Array.from(document.querySelectorAll('img[data-asset]'),img=>({img,file:img.dataset.asset}))];
+  const jobs=[...Object.entries(artFiles).map(([key,file])=>({key,img:art[key],file,done:false})),{key:'toy-normal-current',img:$('currentAmmoIcon'),file:'toy-normal',done:false},...Array.from(document.querySelectorAll('img[data-asset]'),img=>({key:img.dataset.asset,img,file:img.dataset.asset,done:false}))];
+  const byKey=new Map(jobs.map(job=>[job.key,job]));
+  const firstLevelKeys=['courtyard','gardenDecor','player','normalMonster','toy-title','toy-normal-current','toy-fast','toy-explosive','toy-scatter'];
   const progress=$('loadingProgress'),status=$('loadingStatus'),retry=$('loadingRetry'),main=document.querySelector('main');
-  let running=false;
-  const completed=()=>jobs.filter(job=>job.done).length;
-  const report=()=>{progress.max=jobs.length;progress.value=completed();status.textContent=`素材准备 ${completed()} / ${jobs.length} · ${Math.round(completed()/jobs.length*100)}%`;};
+  let running=false,backgroundPromise=null,pendingLevel=null,loadRequest=0;
+  const report=(queue,label='首关画面')=>{const done=queue.filter(job=>job.done).length;progress.max=queue.length;progress.value=done;status.textContent=`${label} ${done} / ${queue.length} · ${Math.round(done/queue.length*100)}%`;};
   const fetchImage=(job,attempt)=>new Promise((resolve,reject)=>{
    const img=job.img;let finished=false;
    const finish=error=>{if(finished)return;finished=true;clearTimeout(timer);img.onload=img.onerror=null;error?reject(error):resolve();};
@@ -27,24 +29,46 @@
    // The third attempt is the original PNG, also a fallback for older WebP decoders.
    img.src=`assets/${job.file}.${attempt===2?'png':'webp'}${attempt===1?`?retry=${Date.now()}`:''}`;
   });
-  async function run(){
-   if(running)return;running=true;retry.hidden=true;report();
-   await Promise.all(jobs.filter(job=>!job.done).map(async job=>{
-    for(let attempt=0;attempt<3;attempt++)try{await fetchImage(job,attempt);job.done=true;report();return;}catch{/* Retry only this failed asset; keep all successful downloads. */}
-   }));
-   running=false;
-   if(completed()!==jobs.length){status.textContent=`还有 ${jobs.length-completed()} 个素材未加载成功，请检查网络后重试。`;retry.hidden=false;return;}
-   status.textContent='正在准备持枪小人…';await window.playerModelReady;
-   assetsReady=true;status.textContent=window.playerModel?.ready?'准备就绪 · 点击进入，音乐随即开启':'准备就绪 · 使用兼容人物画面';$('loadingStart').hidden=false;
+  async function loadJobs(queue,onProgress){
+   const results=await Promise.all(queue.map(async job=>{
+    if(job.done)return true;
+    if(job.promise)return job.promise;
+    job.promise=(async()=>{for(let attempt=0;attempt<3;attempt++)try{await fetchImage(job,attempt);job.done=true;onProgress?.();return true;}catch{/* Retry only this failed asset; keep all successful downloads. */}return false;})().finally(()=>{job.promise=null;});
+    return job.promise;
+   }));return results.every(Boolean);
   }
-  $('loadingStart').onclick=async()=>{
-   const button=$('loadingStart');if(!assetsReady||button.disabled)return;
-   button.disabled=true;button.textContent='正在准备音乐…';
-   try{await window.gameAudio?.start();}finally{
-    gameEntered=true;dragging=false;main.inert=false;document.body.classList.remove('loading');syncCanvas();draw();$('loadingScreen').hidden=true;
-   }
+  const requiredKeys=index=>{
+   const level=levels[index],keys=new Set(['courtyard','gardenDecor','player','normalMonster','toy-title','toy-normal-current']);
+   for(const enemy of level.enemies){const type=enemy[2]||'normal';if(type==='bomb')keys.add('monster');if(type==='shield')keys.add('shield');if(type==='helmet'){keys.add('helmetMonster');keys.add('helmetBare');keys.add('helmet');}}
+   for(const wall of level.walls){const type=wall.type||'iron';keys.add(type);if(type==='obstacle')keys.add('woodDamaged');}
+   if(level.barrels.length)keys.add('barrel');return [...keys];
   };
-  retry.onclick=run;run();
+  const keysReady=keys=>keys.every(key=>byKey.get(key)?.done);
+  ensureLevelAssets=async index=>{const queue=requiredKeys(index).map(key=>byKey.get(key));if(queue.some(job=>!job))return false;return loadJobs(queue,()=>{if(!loadingScreen.hidden)report(queue,'本关画面');});};
+  const showPendingLevel=(index,keep,request)=>{pendingLevel={index,keep,request};main.inert=true;loadingScreen.hidden=false;retry.hidden=true;const queue=requiredKeys(index).map(key=>byKey.get(key)).filter(Boolean);report(queue,'本关画面');};
+  showLevelLoading=(index,keep)=>{const keys=requiredKeys(index);if(keysReady(keys))return null;const request=++loadRequest;showPendingLevel(index,keep,request);return ensureLevelAssets(index).then(ok=>{if(request!==loadRequest)return false;if(ok){pendingLevel=null;main.inert=false;loadingScreen.hidden=true;load(index,keep);return true;}status.textContent='本关素材加载失败，请检查网络后重试。';retry.hidden=false;return false;});};
+  async function runInitial(){
+   if(running)return;running=true;retry.hidden=true;const queue=firstLevelKeys.map(key=>byKey.get(key));report(queue);
+   const ok=await loadJobs(queue,()=>report(queue));
+   if(!ok){running=false;status.textContent=`首关还有 ${queue.filter(job=>!job.done).length} 个素材未加载成功，请检查网络后重试。`;retry.hidden=false;return;}
+   status.textContent='正在准备持枪小人…';progress.max=1;progress.value=0;
+   await window.loadPlayerModel?.();
+   assetsReady=true;initialReadyAt=now();running=false;progress.value=1;status.textContent=window.playerModel?.ready?'准备就绪 · 点击进入，音乐随即开启':'准备就绪 · 使用兼容人物画面';$('loadingStart').hidden=false;
+  }
+  function runBackground(){
+   if(backgroundPromise)return backgroundPromise;
+   const remaining=jobs.filter(job=>!job.done&&!firstLevelKeys.includes(job.key));
+   backgroundPromise=loadJobs(remaining).then(ok=>{allAssetsReady=ok;return ok;});return backgroundPromise;
+  }
+  retry.onclick=()=>{if(!gameEntered){runInitial();return;}if(pendingLevel)load(pendingLevel.index,pendingLevel.keep);};
+  $('loadingStart').onclick=()=>{
+   const button=$('loadingStart');if(!assetsReady||button.disabled)return;
+   button.disabled=true;button.hidden=true;button.textContent='正在准备音乐…';
+   const audioReady=Promise.resolve(window.gameAudio?.start()).catch(()=>{});
+   gameEntered=true;dragging=false;main.inert=false;document.body.classList.remove('loading');syncCanvas();draw();$('loadingScreen').hidden=true;
+   audioReady.finally(runBackground);
+  };
+  runInitial();
  }
  const ready=img=>img&&img.complete&&img.naturalWidth>0;
  let recoilUntil=0;
@@ -147,7 +171,8 @@
  function refreshTrajectory(){const button=$('viewTrajectory');button.disabled=state.phase!=='aim'||!previous.length;button.textContent=showPrevious?'取消查看轨迹':'查看轨迹';button.setAttribute('aria-pressed',String(showPrevious));button.setAttribute('aria-label',button.textContent);button.title=previous.length?(showPrevious?'再次点击取消查看轨迹':'点击查看上一枪轨迹'):'先射击一次，下一枪或重试时可查看';}
  $('viewTrajectory').onclick=()=>{if(state.phase!=='aim'||!previous.length)return;showPrevious=!showPrevious;refreshTrajectory();};
  function selectAmmo(type){if(!ammoTypes[type]||state.phase!=='aim'||state.inventory[type]<=0)return false;selectedAmmo=type;state.ammo=type;refreshAmmo();return true;}
- function load(index,keep=false){previous=keep&&state?.index===index?(state.segments.length?state.segments.map(s=>({...s})):previous):[];showPrevious=false;configureRoom(index);state=newState(index);if(!state.inventory[selectedAmmo])selectedAmmo=Object.keys(levels[index].ammo)[0];state.ammo=selectedAmmo;dragging=false;slow=0;screenShake=0;$('result').hidden=true;$('levelName').textContent=`${levelGroups[levels[index].group].short} ${String(levels[index].number).padStart(2,'0')} / ${levels[index].name.split(' · ')[1]}`;$('stateText').textContent='拖动瞄准 · 松手开枪';refreshAmmo();updateCounter();refreshComparison();document.querySelectorAll('.level-button').forEach(b=>b.classList.toggle('active',Number(b.dataset.levelIndex)===index));}
+ function applyLoad(index,keep=false){previous=keep&&state?.index===index?(state.segments.length?state.segments.map(s=>({...s})):previous):[];showPrevious=false;configureRoom(index);state=newState(index);if(!state.inventory[selectedAmmo])selectedAmmo=Object.keys(levels[index].ammo)[0];state.ammo=selectedAmmo;dragging=false;slow=0;screenShake=0;$('result').hidden=true;$('levelName').textContent=`${levelGroups[levels[index].group].short} ${String(levels[index].number).padStart(2,'0')} / ${levels[index].name.split(' · ')[1]}`;$('stateText').textContent='拖动瞄准 · 松手开枪';refreshAmmo();updateCounter();refreshComparison();document.querySelectorAll('.level-button').forEach(b=>b.classList.toggle('active',Number(b.dataset.levelIndex)===index));}
+ function load(index,keep=false){if(!gameEntered){applyLoad(index,keep);return;}const waiting=showLevelLoading(index,keep);if(waiting)return waiting;applyLoad(index,keep);return Promise.resolve(true);}
  function refreshComparison(){const r=comparison[state.index];$('comparison').hidden=false;$('comparisonRows').innerHTML=`<tr><td>本关</td><td>${r?r.last+'/'+state.enemies.length:'—'}</td><td>${r?r.best+'/'+state.enemies.length:'—'}</td><td>${r?r.bestScore:'—'}</td><td>${r?'★'.repeat(r.bestStars)+'☆'.repeat(3-r.bestStars):'—'}</td><td>${r?r.tries:0}</td></tr>`;const [two,three]=levels[state.index].starScores;$('ratingGoal').textContent=two===three?'机制教学：清场即可三星。':`星级目标：通关至少一星 · 二星 ${two} 分 · 三星 ${three} 分。连击和省弹都能提高总分。`;refreshLevelSelection();}
  function refreshLevelSelection(){const nav=$('levels'),active=nav.querySelector?.(`[data-level-index="${state.index}"]`);if(active){const top=active.getBoundingClientRect().top-nav.getBoundingClientRect().top+nav.scrollTop;if(top<nav.scrollTop)nav.scrollTop=top;else if(top+active.offsetHeight>nav.scrollTop+nav.clientHeight)nav.scrollTop=top+active.offsetHeight-nav.clientHeight;}}
 
@@ -553,7 +578,7 @@
  load(Math.max(0,levels.findIndex(l=>l.group==='formal')));let lastShotCount=stats.shots;function frame(time){let dt=Math.min(.032,(time-lastTime)/1000||.016);lastTime=time;if(lastShotCount!==stats.shots){lastShotCount=stats.shots;recoilUntil=state.time+.12;}if(slow>0){slow-=dt;dt*=.35;}update(dt);draw();requestAnimationFrame(frame);}requestAnimationFrame(frame);
  prepareAssets();
  // Small diagnostic surface for repeatable shot and physics verification.
- window.demo={get gameEntered(){return gameEntered;},get assetsReady(){return assetsReady;},get state(){return state;},get stage(){return {W,H,origin,bounds};},get playerRig(){return playerRig();},courtyardDetails,get courtyardDecor(){return courtyardCache?.details.map(item=>({...item}))||[];},enemyIdlePose,shieldPeekPose,shadowGeometry,terrainVolume,shieldGeometry,rotorContact,rotorRay,rotorRules,comparison,levels,ammoTypes,scoreRules,starsForScore,selectAmmo,load,shootAt(x,y){if(state.phase!=='aim')return;const dx=x-origin.x,dy=Math.min(-30,y-origin.y),length=Math.hypot(dx,dy);aim={x:dx/length,y:dy/length};shoot();},step:update,render:draw,stats};
+ window.demo={get gameEntered(){return gameEntered;},get assetsReady(){return assetsReady;},get allAssetsReady(){return allAssetsReady;},get initialReadyMs(){return initialReadyAt;},get playerMode(){return window.playerModel?.ready?'3d':'sprite';},get state(){return state;},get stage(){return {W,H,origin,bounds};},get playerRig(){return playerRig();},assetReady(key){return !!art[key]&&ready(art[key]);},courtyardDetails,get courtyardDecor(){return courtyardCache?.details.map(item=>({...item}))||[];},enemyIdlePose,shieldPeekPose,shadowGeometry,terrainVolume,shieldGeometry,rotorContact,rotorRay,rotorRules,comparison,levels,ammoTypes,scoreRules,starsForScore,selectAmmo,load,shootAt(x,y){if(state.phase!=='aim')return;const dx=x-origin.x,dy=Math.min(-30,y-origin.y),length=Math.hypot(dx,dy);aim={x:dx/length,y:dy/length};shoot();},step:update,render:draw,stats};
  window.demo.enemyGrounding=enemyGrounding;
 })();
 
