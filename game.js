@@ -96,31 +96,63 @@
   {name:'正式 · 错位回廊',sub:'4只怪 · 普通弹 ×3',lesson:'把挡板当作路线的一部分，给剩余目标留出处理空间。',hint:'不同挡板会影响不同方向的子弹。每一枪后，已经击倒的目标都会保留。',ammo:{normal:3},room:{width:440,height:560},enemies:[[90,255],[270,255],[140,135],[290,125]],walls:[{x:150,y:330,w:140,h:16,type:'iron'},{x:100,y:210,w:95,h:16,type:'iron'}],barrels:[]},
   {name:'正式 · 双庭回响',sub:'4只怪 · 普通弹 ×3',lesson:'比较两边的地形，安排各枪负责的目标。',hint:'两边的布局并不相同。先看这一枪能经过哪些目标，再决定下一枪的方向。',ammo:{normal:3},room:{width:460,height:600},enemies:[[90,300],[140,150],[350,260],[305,135]],walls:[{x:220,y:18,w:20,h:360,type:'iron'},{x:60,y:225,w:90,h:14,type:'iron'},{x:310,y:185,w:95,h:14,type:'iron'}],barrels:[]}
  );
+ // Formal 04–08 introduce one main mechanic at a time after the opening trio.
+ levels.splice(14,0,
+  {"name":"正式 · 木门回声","room":{"width":460,"height":600},"ammo":{"normal":4},"enemies":[[160,300],[110,150],[350,260],[305,135]],"walls":[{"x":220,"y":18,"w":20,"h":360,"type":"iron"},{"x":18,"y":225,"w":202,"h":14,"type":"obstacle"},{"x":310,"y":185,"w":95,"h":14,"type":"iron"}],"barrels":[],"sub":"木门要打两次 · 普通 ×4","lesson":"木门受损会保留；在开门与另一侧清场之间安排射击。","hint":"木门受损会保留；在开门与另一侧清场之间安排射击。"},
+  {"name":"正式 · 护盔夹庭","room":{"width":460,"height":600},"ammo":{"normal":5},"enemies":[[160,300],[110,150,"helmet"],[350,260],[305,135,"helmet"]],"walls":[{"x":220,"y":18,"w":20,"h":360,"type":"iron"},{"x":18,"y":225,"w":202,"h":14,"type":"obstacle"},{"x":310,"y":185,"w":95,"h":14,"type":"iron"}],"barrels":[],"sub":"头盔先破再击倒 · 普通 ×5","lesson":"破盔不续能，需要让路线再次经过目标，或留弹补枪。","hint":"破盔不续能，需要让路线再次经过目标，或留弹补枪。"},
+  {"name":"正式 · 引爆两岸","room":{"width":460,"height":600},"ammo":{"normal":4},"enemies":[[100,150,"helmet"],[145,110],[65,115],[350,260,"helmet"],[305,135],[370,140]],"walls":[{"x":220,"y":18,"w":20,"h":360,"type":"iron"},{"x":18,"y":225,"w":202,"h":14,"type":"obstacle"},{"x":310,"y":185,"w":95,"h":14,"type":"iron"}],"barrels":[[110,205],[350,210]],"sub":"借桶爆炸扩大清场 · 普通 ×4","lesson":"桶的爆炸范围比爆炸弹更大，可越过护甲并打开木门。","hint":"桶的爆炸范围比爆炸弹更大，可越过护甲并打开木门。"},
+  {"name":"正式 · 盾后回廊","room":{"width":460,"height":600},"ammo":{"normal":5},"enemies":[[180,160],[135,150,"shield"],[153,50],[357,125,"shield"],[310,140,"helmet"],[329,50],[320,340]],"walls":[{"x":220,"y":18,"w":20,"h":360,"type":"iron"},{"x":18,"y":225,"w":135,"h":14,"type":"obstacle"},{"x":310,"y":185,"w":95,"h":14,"type":"iron"}],"barrels":[],"sub":"盾牌正面挡弹，试试回程 · 普通 ×5","lesson":"盾牌朝向不变，从背后进入；同时兼顾另一侧的头盔和木门。","hint":"盾牌朝向不变，从背后进入；同时兼顾另一侧的头盔和木门。"},
+  {"name":"正式 · 破墙分工","room":{"width":500,"height":660},"ammo":{"explosive":1,"normal":5},"enemies":[[190,380],[120,160,"helmet"],[95,80],[400,430,"shield"],[330,160],[395,140]],"walls":[{"x":240,"y":18,"w":20,"h":400,"type":"iron"},{"x":18,"y":225,"w":222,"h":18,"type":"brick"},{"x":260,"y":300,"w":222,"h":18,"type":"brick"}],"barrels":[[400,340]],"sub":"石墙需要爆炸 · 爆炸 ×1 + 普通 ×5","lesson":"爆炸弹引爆就消失，用它开石门，再用普通弹处理剩余目标。","hint":"爆炸弹引爆就消失，用它开石门，再用普通弹处理剩余目标。"}
+ );
+ // Formal 09–12 complete the existing weapon, enemy and terrain set.
+ levels.splice(19,0,
+  {"name":"正式 · 穿甲长廊","sub":"贯穿木门与头盔 · 穿甲 ×1 + 普通 ×3","room":{"width":500,"height":660},"ammo":{"fast":1,"normal":3},"enemies":[[190,380],[150,260,"helmet"],[120,160,"helmet"],[95,80],[400,430,"shield"],[330,160],[395,140]],"walls":[{"x":240,"y":18,"w":20,"h":400,"type":"iron"},{"x":18,"y":225,"w":222,"h":18,"type":"obstacle"},{"x":260,"y":300,"w":222,"h":18,"type":"brick"}],"barrels":[[400,340]],"lesson":"穿甲弹可以贯穿木门与头盔；把它留给有价值的连续路线。","hint":"穿甲弹可以贯穿木门与头盔；把它留给有价值的连续路线。"},
+  {"name":"正式 · 扇面分庭","sub":"远处展开、留弹补枪 · 穿甲 ×1 + 散弹 ×1 + 普通 ×2","room":{"width":520,"height":680},"ammo":{"fast":1,"scatter":1,"normal":2},"enemies":[[190,380],[150,260,"helmet"],[120,160,"helmet"],[95,80],[315,160],[375,110],[445,160],[455,340,"shield"]],"walls":[{"x":250,"y":18,"w":20,"h":400,"type":"iron"},{"x":18,"y":225,"w":232,"h":18,"type":"obstacle"}],"barrels":[],"lesson":"散弹越远越展开；区域清场之后，仍要留弹处理盾牌。","hint":"散弹越远越展开；区域清场之后，仍要留弹处理盾牌。"},
+  {"name":"正式 · 转向接力","sub":"受击转90° · 穿甲 ×1 + 普通 ×3","room":{"width":520,"height":680},"ammo":{"fast":1,"normal":3},"enemies":[[95,360,"helmet"],[55,360],[355,360],[425,360],[435,100,"shield"]],"walls":[{"x":135,"y":315,"w":16,"h":95,"type":"obstacle"},{"x":180,"y":315,"w":16,"h":95,"type":"obstacle"},{"x":70,"y":470,"w":120,"h":16,"type":"iron"},{"x":330,"y":470,"w":120,"h":16,"type":"iron"}],"barrels":[],"rotors":[{"x":260,"y":350,"length":112,"thickness":12,"angle":-0.7853981633974483}],"lesson":"挡板受击后转90度，下一枪方向会变；观察两侧目标再选弹。","hint":"挡板受击后转90度，下一枪方向会变；观察两侧目标再选弹。"},
+  {"name":"正式 · 满庭连响","sub":"炸弹怪串起全场 · 四弹种分工","room":{"width":600,"height":760},"ammo":{"fast":1,"explosive":1,"scatter":1,"normal":3},"enemies":[[100,460,"helmet"],[60,460],[415,445,"bomb"],[470,470,"shield"],[400,500,"helmet"],[365,430],[112,210],[88,150],[395,200],[450,200],[505,200]],"walls":[{"x":280,"y":18,"w":20,"h":300,"type":"iron"},{"x":18,"y":275,"w":262,"h":18,"type":"brick"},{"x":350,"y":300,"w":232,"h":18,"type":"brick"},{"x":180,"y":405,"w":16,"h":90,"type":"obstacle"},{"x":220,"y":405,"w":16,"h":90,"type":"obstacle"}],"barrels":[[460,380]],"rotors":[{"x":300,"y":450,"length":100,"thickness":12,"angle":-0.7853981633974483}],"lesson":"炸弹怪可以带动桶、炸开石门；不同弹种负责不同区域。","hint":"炸弹怪可以带动桶、炸开石门；不同弹种负责不同区域。"}
+ );
  levels.forEach(l=>{l.group=l.name.startsWith('正式 · ')?'formal':l.name.startsWith('效率测试 · ')?'test':'tutorial';l.number=++groupCounts[l.group];});
  function nextLevel(index){const group=levels[index].group;if(levels[index+1]?.group===group)return index+1;if(group==='tutorial'){const first=levels.findIndex(l=>l.group==='formal');if(first>=0)return first;}return index;}
- function configureRoom(index){recoilUntil=0;({width:W,height:H}=levels[index].room);origin.x=W/2;origin.y=H-84;bounds.right=W-18;bounds.bottom=H-18;$('gameLayout').style.setProperty?.('--stage-width',W+'px');syncCanvas();$('roomSize').textContent=`${W} × ${H}`;}
+ function configureRoom(index){recoilUntil=0;({width:W,height:H}=levels[index].room);origin.x=W/2;origin.y=H-84;bounds.right=W-18;bounds.bottom=H-18;$('gameLayout').style.setProperty?.('--stage-width',W+'px');syncCanvas();}
  const comparison={};
- const scoreRules={hit:10,comboStep:5,comboWindow:1};
+ const scoreRules={hit:10,comboStep:5,comboWindow:1,unusedAmmo:{normal:20,fast:30,explosive:40,scatter:50}};
+ // Per-level two/three-star score targets, verified against allocated-ammo routes.
+ const starTargets=[[30,45],[10,10],[20,20],[10,10],[10,10],[10,10],[45,70],[30,45],[10,10],[30,45],[20,20],[60,90],[50,70],[50,70],[45,65],[70,95],[100,135],[100,130],[90,110],[100,125],[110,145],[60,80],[145,185],[180,265],[20,20],[400,610]];
+ levels.forEach((level,index)=>{level.starScores=starTargets[index];});
+ function starsForScore(index,score,cleared=true){if(!cleared)return 0;const [two,three]=levels[index].starScores;return score>=three?3:score>=two?2:1;}
+ function refreshResultRating(won){
+  const stars=state.stars,[two,three]=levels[state.index].starScores;
+  $('resultStars').hidden=!won;
+  $('resultStars').setAttribute('aria-label',`本次评价：${stars} / 3 星`);
+  $('resultStars').innerHTML=[0,1,2].map(i=>`<span aria-hidden="true" class="${i<stars?'earned':''}">★</span>`).join('');
+  $('resultTargets').hidden=!won;
+  $('resultTargets').textContent=two===three?'机制教学 · 清场即可三星':`二星 ${two} 分 · 三星 ${three} 分`;
+  $('resultRatingHint').textContent=!won?'再试一次，先完成清场！':stars===3?'三星达成！试试挑战更高分。':`距${stars===1?'二':'三'}星还差 ${(stars===1?two:three)-state.score} 分 · 多连击，少用弹。`;
+  $('resultRetry').hidden=!won||nextLevel(state.index)===state.index;
+  $('resultRetry').textContent=stars===3?'再刷高分':'重试冲星';
+ }
+
  // Relative power is separate from the engine's time-based energy budget.
  const energyBalance={base:1.6,cap:4*2/3,recharge:.38*2/3};
  const ammoTypes={normal:{name:'普通子弹',sub:'动能 ×1 · 穿透弹射',power:1,color:'#c7f681',speed:1,duration:5.5,count:1,hint:'动能比例 1：一颗穿透弹，击中小怪续能。找好角度，借墙完成连击。'},fast:{name:'穿甲子弹',sub:'动能 ×1.5 · 贯穿木障与头盔',armorPiercing:true,power:1.5,color:'#7de0ff',speed:1.5,duration:7,count:1,hint:'动能比例 1.5，速度为普通弹的 1.5 倍。一击穿透木障碍、一击击倒头盔怪；石墙、加固石墙和盾牌仍会反弹。'},explosive:{name:'爆炸子弹',sub:'动能 ×0.8 · 一次爆炸',power:.8,color:'#ffab70',speed:1,duration:5.5,count:1,hint:'动能比例 0.8：首次碰到怪物或炸药桶，触发一次小范围爆炸。没命中则在耗尽时爆炸。'},scatter:{name:'散弹',sub:'动能 ×0.5 · 渐展扇形',power:.5,color:'#f4a7e8',speed:.9,duration:4,count:8,spread:48*Math.PI/180,startSpread:4*Math.PI/180,spreadTime:.25,hint:'每颗散弹动能比例 0.5：八颗弹丸沿瞄准方向射出，逐渐展开成扇形。近处集中、远处分散，瞄准怪群中间；每颗独立反弹和续能。'}};
  ammoTypes.explosive.hint+='爆炸后子弹立即消失，可引爆附近的炸药桶。';
  // Darker trails remain readable over the light courtyard; balance is unchanged.
  Object.assign(ammoTypes.normal,{color:'#8060bb'});Object.assign(ammoTypes.fast,{color:'#24769c'});Object.assign(ammoTypes.explosive,{color:'#cb692e'});Object.assign(ammoTypes.scatter,{color:'#a34d94'});
- for(const type of Object.values(ammoTypes)){type.energy=energyBalance.base*type.power;type.maxEnergy=energyBalance.cap*type.power;type.recharge=energyBalance.recharge*type.power;}
+ for(const [key,type] of Object.entries(ammoTypes)){type.hint+=` 通关时每剩1发奖励${scoreRules.unusedAmmo[key]}分。`;type.energy=energyBalance.base*type.power;type.maxEnergy=energyBalance.cap*type.power;type.recharge=energyBalance.recharge*type.power;}
  let selectedAmmo='normal',state,aim={x:0,y:-1},dragging=false,previous=[],showPrevious=false,lastTime=0,screenShake=0,slow=0;
  const stats={shots:0};
- function newState(index){const l=levels[index];return {index,phase:'aim',ammo:selectedAmmo,inventory:Object.fromEntries(Object.keys(ammoTypes).map(key=>[key,l.ammo[key]||0])),shotsUsed:0,shotLog:[],enemies:l.enemies.map(([x,y,type='normal'],id)=>({x,y,type,id,r:type==='shield'?23:18,hp:type==='helmet'?2:1,alive:true,flash:0})),barrels:l.barrels.map(([x,y],id)=>({x,y,id,r:14,alive:true})),walls:l.walls.map((w,id)=>({...w,id,type:w.type||'iron',hp:terrainTypes[w.type||'iron'].hp,alive:true})),rotors:(l.rotors||[]).map((g,id)=>({...g,id,turnedAt:-Infinity,previousAngle:g.angle,turns:0})),rotorTurns:0,terrainDestroyed:0,bullet:null,bullets:[],score:0,baseScore:0,comboBonus:0,hitCount:0,comboCount:0,maxCombo:0,lastHitTime:-Infinity,explosions:0,bombExplosions:0,barrelExplosions:0,helmetBreaks:0,dropped:0,segments:[],particles:[],helmets:[],rings:[],labels:[],time:0,kills:0,bounces:0};}
+ function newState(index){const l=levels[index];return {index,phase:'aim',ammo:selectedAmmo,inventory:Object.fromEntries(Object.keys(ammoTypes).map(key=>[key,l.ammo[key]||0])),shotsUsed:0,shotLog:[],enemies:l.enemies.map(([x,y,type='normal'],id)=>({x,y,type,id,r:type==='shield'?23:18,hp:type==='helmet'?2:1,alive:true,flash:0})),barrels:l.barrels.map(([x,y],id)=>({x,y,id,r:14,alive:true})),walls:l.walls.map((w,id)=>({...w,id,type:w.type||'iron',hp:terrainTypes[w.type||'iron'].hp,alive:true})),rotors:(l.rotors||[]).map((g,id)=>({...g,id,turnedAt:-Infinity,previousAngle:g.angle,turns:0})),rotorTurns:0,terrainDestroyed:0,bullet:null,bullets:[],score:0,baseScore:0,comboBonus:0,ammoBonus:0,stars:0,hitCount:0,comboCount:0,maxCombo:0,lastHitTime:-Infinity,explosions:0,bombExplosions:0,barrelExplosions:0,helmetBreaks:0,dropped:0,segments:[],particles:[],helmets:[],rings:[],labels:[],time:0,kills:0,bounces:0};}
  function remainingAmmo(){return Object.values(state.inventory).reduce((sum,n)=>sum+n,0);}
- function refreshAmmo(){document.querySelectorAll('.ammo-button').forEach(b=>{const key=b.dataset.ammo;b.hidden=!levels[state.index].ammo[key];b.classList.toggle('active',key===selectedAmmo);b.setAttribute('aria-pressed',String(key===selectedAmmo));b.disabled=state.phase!=='aim'||state.inventory[key]<=0;b.title=levels[state.index].ammo[key]?`本关配发 ${levels[state.index].ammo[key]} 发，剩余 ${state.inventory[key]} 发`:'本关未配发';b.setAttribute('aria-label',`${ammoTypes[key].name}，${b.title}`);});for(const key of Object.keys(ammoTypes))$('stock-'+key).textContent=levels[state.index].ammo[key]?`× ${state.inventory[key]}`:'本关未配发';$('ammoSummary').textContent=`本关剩余 ${remainingAmmo()} 发 · 已射击 ${state.shotsUsed} 次`;$('ammoHint').textContent=ammoTypes[selectedAmmo].hint;$('speed').value='800';$('speed').disabled=true;if(state.phase==='aim')$('combo').textContent=ammoTypes[selectedAmmo].name;refreshTrajectory();}
- function refreshTrajectory(){const button=$('viewTrajectory');button.disabled=state.phase!=='aim'||!previous.length||showPrevious;button.textContent=showPrevious?'上一枪轨迹已显示':'查看上一枪轨迹';button.title=previous.length?'只在本次瞄准中显示，下一枪或重试恢复隐藏':'先射击一次，下一枪或重试时可查看';}
- $('viewTrajectory').onclick=()=>{if(state.phase!=='aim'||!previous.length||showPrevious)return;showPrevious=true;refreshTrajectory();};
+ function refreshAmmo(){document.querySelectorAll('.ammo-button').forEach(b=>{const key=b.dataset.ammo;b.hidden=!levels[state.index].ammo[key];b.classList.toggle('active',key===selectedAmmo);b.setAttribute('aria-pressed',String(key===selectedAmmo));b.disabled=state.phase!=='aim'||state.inventory[key]<=0;b.title=levels[state.index].ammo[key]?`本关配发 ${levels[state.index].ammo[key]} 发，剩余 ${state.inventory[key]} 发`:'本关未配发';b.setAttribute('aria-label',`${ammoTypes[key].name}，${b.title}`);});for(const key of Object.keys(ammoTypes))$('stock-'+key).textContent=levels[state.index].ammo[key]?`× ${state.inventory[key]}`:'本关未配发';$('ammoSummary').textContent=`本关剩余 ${remainingAmmo()} 发 · 已射击 ${state.shotsUsed} 次`;if(state.phase==='aim')$('combo').textContent=ammoTypes[selectedAmmo].name;refreshTrajectory();}
+ function refreshTrajectory(){const button=$('viewTrajectory');button.disabled=state.phase!=='aim'||!previous.length;button.textContent=showPrevious?'取消查看轨迹':'查看轨迹';button.setAttribute('aria-pressed',String(showPrevious));button.setAttribute('aria-label',button.textContent);button.title=previous.length?(showPrevious?'再次点击取消查看轨迹':'点击查看上一枪轨迹'):'先射击一次，下一枪或重试时可查看';}
+ $('viewTrajectory').onclick=()=>{if(state.phase!=='aim'||!previous.length)return;showPrevious=!showPrevious;refreshTrajectory();};
  function selectAmmo(type){if(!ammoTypes[type]||state.phase!=='aim'||state.inventory[type]<=0)return false;selectedAmmo=type;state.ammo=type;refreshAmmo();return true;}
- function load(index,keep=false){previous=keep&&state?.index===index?(state.segments.length?state.segments.map(s=>({...s})):previous):[];showPrevious=false;configureRoom(index);state=newState(index);if(!state.inventory[selectedAmmo])selectedAmmo=Object.keys(levels[index].ammo)[0];state.ammo=selectedAmmo;dragging=false;slow=0;screenShake=0;$('result').hidden=true;$('levelName').textContent=`${levelGroups[levels[index].group].short} ${String(levels[index].number).padStart(2,'0')} / ${levels[index].name.split(' · ')[1]}`;$('hint').textContent=levels[index].hint;$('lessonGoal').textContent=levels[index].lesson;$('stateText').textContent='拖动瞄准 · 松手开枪';refreshAmmo();updateCounter();refreshComparison();document.querySelectorAll('.level-button').forEach((b,i)=>b.classList.toggle('active',i===index));}
- function refreshComparison(){const r=comparison[state.index];$('comparison').hidden=false;$('comparisonRows').innerHTML=`<tr><td>本关</td><td>${r?r.last+'/'+state.enemies.length:'—'}</td><td>${r?r.best+'/'+state.enemies.length:'—'}</td><td>${r?r.bestScore:'—'}</td><td>${r?r.tries:0}</td></tr>`;refreshLessonElements();}
- function refreshLessonElements(){const l=levels[state.index],kinds=new Set(l.enemies.map(e=>e[2]||'normal'));for(const w of l.walls)kinds.add(w.type||'iron');if(l.rotors?.length)kinds.add('rotor');if(l.barrels.length)kinds.add('barrel');document.querySelectorAll('[data-kind]').forEach(el=>el.hidden=!kinds.has(el.dataset.kind));const nav=$('levels'),active=nav.querySelector?.(`[data-level-index="${state.index}"]`);if(active){const top=active.getBoundingClientRect().top-nav.getBoundingClientRect().top+nav.scrollTop;if(top<nav.scrollTop)nav.scrollTop=top;else if(top+active.offsetHeight>nav.scrollTop+nav.clientHeight)nav.scrollTop=top+active.offsetHeight-nav.clientHeight;}}
+ function load(index,keep=false){previous=keep&&state?.index===index?(state.segments.length?state.segments.map(s=>({...s})):previous):[];showPrevious=false;configureRoom(index);state=newState(index);if(!state.inventory[selectedAmmo])selectedAmmo=Object.keys(levels[index].ammo)[0];state.ammo=selectedAmmo;dragging=false;slow=0;screenShake=0;$('result').hidden=true;$('levelName').textContent=`${levelGroups[levels[index].group].short} ${String(levels[index].number).padStart(2,'0')} / ${levels[index].name.split(' · ')[1]}`;$('stateText').textContent='拖动瞄准 · 松手开枪';refreshAmmo();updateCounter();refreshComparison();document.querySelectorAll('.level-button').forEach(b=>b.classList.toggle('active',Number(b.dataset.levelIndex)===index));}
+ function refreshComparison(){const r=comparison[state.index];$('comparison').hidden=false;$('comparisonRows').innerHTML=`<tr><td>本关</td><td>${r?r.last+'/'+state.enemies.length:'—'}</td><td>${r?r.best+'/'+state.enemies.length:'—'}</td><td>${r?r.bestScore:'—'}</td><td>${r?'★'.repeat(r.bestStars)+'☆'.repeat(3-r.bestStars):'—'}</td><td>${r?r.tries:0}</td></tr>`;const [two,three]=levels[state.index].starScores;$('ratingGoal').textContent=two===three?'机制教学：清场即可三星。':`星级目标：通关至少一星 · 二星 ${two} 分 · 三星 ${three} 分。连击和省弹都能提高总分。`;refreshLevelSelection();}
+ function refreshLevelSelection(){const nav=$('levels'),active=nav.querySelector?.(`[data-level-index="${state.index}"]`);if(active){const top=active.getBoundingClientRect().top-nav.getBoundingClientRect().top+nav.scrollTop;if(top<nav.scrollTop)nav.scrollTop=top;else if(top+active.offsetHeight>nav.scrollTop+nav.clientHeight)nav.scrollTop=top+active.offsetHeight-nav.clientHeight;}}
+
  function updateCounter(){$('counter').textContent=`剩余 ${state.enemies.filter(e=>e.alive).length} 只`;$('scoreHud').textContent=`得分 ${state.score}`;}
- function scoreHit(e){e.hitVisualAt=state.time;state.hitCount++;state.comboCount=state.time-state.lastHitTime<=scoreRules.comboWindow+1e-9?state.comboCount+1:1;state.lastHitTime=state.time;state.maxCombo=Math.max(state.maxCombo,state.comboCount);const bonus=(state.comboCount-1)*scoreRules.comboStep;state.baseScore+=scoreRules.hit;state.comboBonus+=bonus;state.score=state.baseScore+state.comboBonus;$('scoreHud').textContent=`得分 ${state.score}`;if(!reducedMotion())$('scoreHud').animate?.([{transform:'scale(1)'},{transform:'scale(1.16)',offset:.3},{transform:'scale(1)'}],{duration:220});$('combo').textContent=state.comboCount>1?`${state.comboCount} 连击 · 额外 +${bonus}`:'命中 +10';state.labels.push({x:e.x,y:e.y-e.r-8,text:`+${scoreRules.hit+bonus}`,life:.9});}
+ function scoreHit(e){e.hitVisualAt=state.time;state.hitCount++;state.comboCount=state.time-state.lastHitTime<=scoreRules.comboWindow+1e-9?state.comboCount+1:1;state.lastHitTime=state.time;state.maxCombo=Math.max(state.maxCombo,state.comboCount);const bonus=(state.comboCount-1)*scoreRules.comboStep;state.baseScore+=scoreRules.hit;state.comboBonus+=bonus;state.score=state.baseScore+state.comboBonus+state.ammoBonus;$('scoreHud').textContent=`得分 ${state.score}`;if(!reducedMotion())$('scoreHud').animate?.([{transform:'scale(1)'},{transform:'scale(1.16)',offset:.3},{transform:'scale(1)'}],{duration:220});$('combo').textContent=state.comboCount>1?`${state.comboCount} 连击 · 额外 +${bonus}`:'命中 +10';state.labels.push({x:e.x,y:e.y-e.r-8,text:`+${scoreRules.hit+bonus}`,life:.9});}
  function tone(name,pitch=1){window.gameAudio?.play(name,pitch);}
  function resultTone(won){if(won)slow=.15;tone(won?'win':'lose');}
  function burst(x,y,color,n=15){n=Math.min(n,Math.max(0,160-state.particles.length));for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=40+Math.random()*200;state.particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:.3+Math.random()*.4,max:.7,color});}}
@@ -154,9 +186,12 @@
  function shoot(){if(!gameEntered||state.phase!=='aim'||state.inventory[selectedAmmo]<=0)return false;state.inventory[selectedAmmo]--;state.shotsUsed++;state.shotLog.push(selectedAmmo);stats.shots++;state.phase='flying';state.ammo=selectedAmmo;state.comboCount=0;state.lastHitTime=-Infinity;showPrevious=false;const type=ammoTypes[selectedAmmo],speed=800*type.speed,angle=Math.atan2(aim.y,aim.x);state.bullets=Array.from({length:type.count},(_,i)=>{const position=type.count>1?i/(type.count-1)-.5:0,spreadAngle=position*(type.startSpread||0),a=angle+spreadAngle;return {id:i,x:origin.x,y:origin.y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,r:4,energy:type.energy,maxEnergy:type.maxEnergy,recharge:type.recharge,duration:type.duration,elapsed:0,spreadAngle,targetSpread:position*(type.spread||0),startSpread:spreadAngle,spreadTime:type.spreadTime||0,spreading:!!type.spread,shieldLock:0,armorPiercing:!!type.armorPiercing,hitEnemies:new Set(),hitWalls:new Set(),hitRotors:new Set(),turnedRotors:new Set(),color:type.color,alive:true,explosionReady:selectedAmmo==='explosive'};});state.bullet=state.bullets[0];refreshAmmo();$('stateText').textContent=`第 ${state.shotsUsed} 枪 · ${type.count>1?'扇形散射':'正在飞行'}`;tone({normal:'shot',fast:'fast',scatter:'scatter',explosive:'explosiveShot'}[selectedAmmo]);return true;}
  function finish(){if(state.phase!=='flying')return;state.phase='settling';state.settle=.45;}
  function showResult(){
+  if(state.phase!=='settling')return;
   const left=state.enemies.filter(e=>e.alive).length,won=left===0;
   if(!won&&remainingAmmo()>0){previous=state.segments.map(s=>({...s}));state.segments=[];showPrevious=false;state.bullet=null;state.bullets=[];state.phase='aim';state.comboCount=0;state.lastHitTime=-Infinity;if(!state.inventory[selectedAmmo])selectedAmmo=Object.keys(state.inventory).find(key=>state.inventory[key]>0);state.ammo=selectedAmmo;$('stateText').textContent=`第 ${state.shotsUsed} 枪结束 · 还有 ${remainingAmmo()} 发`;$('result').hidden=true;refreshAmmo();return;}
-  state.phase='result';const old=comparison[state.index]||{tries:0,best:0,bestScore:0};comparison[state.index]={tries:old.tries+1,last:state.kills,best:Math.max(old.best,state.kills),lastScore:state.score,bestScore:Math.max(old.bestScore,state.score),lastShots:state.shotsUsed};refreshComparison();$('resultTag').textContent=won?'LEVEL CLEARED':'AMMO EMPTY';$('resultTitle').textContent=won?'漂亮，过关！':`弹药用尽 · 剩 ${left} 只`;$('resultScore').textContent=`${state.score} 分`;$('resultBreakdown').textContent=`命中 ${state.baseScore} 分 + 连击奖励 ${state.comboBonus} 分 · 最高 ${state.maxCombo} 连击`;$('resultDesc').textContent=`使用 ${state.shotsUsed} 发 · 清怪 ${state.kills}/${state.enemies.length} · ${state.bounces} 次反弹 · ${state.dropped} 颗落底`;$('resultAction').textContent=won?(nextLevel(state.index)===state.index?'再挑战一次':levels[nextLevel(state.index)].group!==levels[state.index].group?'进入正式关卡 →':'下一关 →'):'重试整关';$('result').hidden=false;$('stateText').textContent=won?'关卡完成':'重新规划弹药和角度';refreshAmmo();resultTone(won);
+  state.ammoBonus=won?Object.entries(state.inventory).reduce((sum,[key,count])=>sum+count*scoreRules.unusedAmmo[key],0):0;state.score=state.baseScore+state.comboBonus+state.ammoBonus;$('scoreHud').textContent=`得分 ${state.score}`;
+  state.stars=starsForScore(state.index,state.score,won);refreshResultRating(won);
+  state.phase='result';const old=comparison[state.index]||{tries:0,best:0,bestScore:0};comparison[state.index]={tries:old.tries+1,last:state.kills,best:Math.max(old.best,state.kills),lastScore:state.score,bestScore:Math.max(old.bestScore,state.score),lastShots:state.shotsUsed,lastStars:state.stars,bestStars:Math.max(old.bestStars||0,state.stars)};refreshComparison();$('resultTag').textContent=won?'LEVEL CLEARED':'AMMO EMPTY';$('resultTitle').textContent=won?'漂亮，过关！':`弹药用尽 · 剩 ${left} 只`;$('resultScore').textContent=`${state.score} 分`;$('resultBreakdown').textContent=`命中 ${state.baseScore} 分 + 连击奖励 ${state.comboBonus} 分 + 省弹奖励 ${state.ammoBonus} 分 · 最高 ${state.maxCombo} 连击`;$('resultDesc').textContent=`使用 ${state.shotsUsed} 发 · 剩余 ${remainingAmmo()} 发 · 清怪 ${state.kills}/${state.enemies.length} · ${state.bounces} 次反弹 · ${state.dropped} 颗落底`;$('resultAction').textContent=won?(nextLevel(state.index)===state.index?'再挑战一次':levels[nextLevel(state.index)].group!==levels[state.index].group?'进入正式关卡 →':'下一关 →'):'重试整关';$('result').hidden=false;$('stateText').textContent=won?'关卡完成':'重新规划弹药和角度';refreshAmmo();resultTone(won);
  }
  function update(dt){state.time+=dt;for(const h of state.helmets){h.x+=h.vx*dt;h.y+=h.vy*dt;h.vy+=650*dt;h.angle+=h.spin*dt;if(h.y>=h.floor&&h.vy>0){h.y=h.floor;if(h.bounces===0){h.vy=-h.vy*.36;h.vx*=.6;h.spin*=.55;h.bounces++;tone('helmet',.65);}else{h.vy=0;h.vx*=Math.exp(-12*dt);h.spin*=Math.exp(-12*dt);}}h.life-=dt;}state.helmets=state.helmets.filter(h=>h.life>0);for(const p of state.particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=Math.exp(-3*dt);p.vy*=Math.exp(-3*dt);if(p.wood||p.toy){p.angle+=p.spin*dt;p.vy+=160*dt;}p.life-=dt;}state.particles=state.particles.filter(p=>p.life>0);for(const r of state.rings){r.r+=r.max*dt/.22;r.life-=dt;}state.rings=state.rings.filter(r=>r.life>0);for(const l of state.labels){l.y-=20*dt;l.life-=dt;}state.labels=state.labels.filter(l=>l.life>0);screenShake=Math.max(0,screenShake-dt*25);if(state.phase==='settling'){state.settle-=dt;if(state.settle<=0)showResult();return;}if(state.phase!=='flying')return;for(const b of state.bullets){if(!b.alive)continue;updateBullet(b,dt);if(!state.enemies.some(e=>e.alive)){finish();break;}}if(state.phase==='flying'&&!state.bullets.some(b=>b.alive))finish();}
  function updateBullet(b,dt){if(state.comboCount>0&&state.time-state.lastHitTime>scoreRules.comboWindow+1e-9){state.comboCount=0;$('combo').textContent='连击中断';}const steps=Math.max(1,Math.ceil(Math.hypot(b.vx,b.vy)*dt/3)),step=dt/steps;
@@ -422,7 +457,7 @@
  function enemyIdlePose(e,time=state.time){
   if(reducedMotion()||!e.alive)return{angle:0,lift:0,sx:1,sy:1};
   if(e.type==='helmet'){
-   const activity=state.phase==='aim'&&!dragging?1:.12,clock=time+e.id*.83+state.index*.23,cycle=((clock%6.4)+6.4)%6.4;
+   const activity=state.phase==='aim'?1:.12,clock=time+e.id*.83+state.index*.23,cycle=((clock%6.4)+6.4)%6.4;
    let angle=Math.sin(clock*1.8)*.065,lift=0;
    // A rigid toy rocks on its rollers; no breathing squash or moving collider.
    if(cycle>1.6&&cycle<2.8){const u=(cycle-1.6)/1.2;angle+=Math.sin(u*Math.PI*4)*Math.sin(u*Math.PI)*.03;}
@@ -430,7 +465,7 @@
    return{angle:angle*activity,lift:lift*activity,sx:1,sy:1};
   }
   if(e.type!=='normal')return{angle:0,lift:0,sx:1,sy:1};
-  const activity=state.phase==='aim'&&!dragging?1:.15,clock=time+e.id*1.31+state.index*.37,cycle=((clock%5.8)+5.8)%5.8;
+  const activity=state.phase==='aim'?1:.15,clock=time+e.id*1.31+state.index*.37,cycle=((clock%5.8)+5.8)%5.8;
   const breath=Math.sin(clock*2.4)*.018*activity;
   let angle=Math.sin(clock*1.3)*.018*activity,lift=0,squash=0;
   if(cycle>1.8&&cycle<2.6)angle+=Math.sin((cycle-1.8)/.8*Math.PI*2)*.075*activity;
@@ -441,7 +476,7 @@
   // Only the illustrated body peeks; the body collider and shield never move.
   if(!e.alive)return{x:0};
   if(reducedMotion())return{x:-12.5};
-  if(state.phase!=='aim'||dragging)return{x:0};
+  if(state.phase!=='aim')return{x:0};
   const cycle=((time+e.id*.91+state.index*.19)%8+8)%8;
   const peek=start=>{const u=cycle-start;if(u<0||u>2)return 0;const t=Math.min(1,u/.4,(2-u)/.4);return t*t*(3-2*t);};
   return{x:12.5*(peek(4.2)-peek(1.5))};
@@ -495,7 +530,7 @@
   for(const h of state.helmets){groundShadow(h.x,h.floor-2,13,4,reducedMotion()?0:Math.max(0,h.floor-h.y)/55,Math.min(1,h.life*4));drawHelmet(h.x,reducedMotion()?h.floor:h.y,reducedMotion()?0:h.angle,Math.min(1,h.life*4));}
   for(const r of state.rings){if(r.blast)drawBlast(r);ctx.globalAlpha=Math.max(0,r.life/.38);ctx.strokeStyle=r.color||(r.max>20?'#ffb576':'#dbffa1');ctx.lineWidth=r.max>20?5:2;ctx.beginPath();ctx.arc(r.x,r.y,Math.min(r.max,r.r),0,Math.PI*2);ctx.stroke();}ctx.globalAlpha=1;
   for(const s of state.segments){const age=state.time-s.t;if(age>.48)continue;ctx.globalAlpha=(1-age/.48)*.7;line(s.x1,s.y1,s.x2,s.y2,s.color,selectedAmmo==='scatter'?2:3);}ctx.globalAlpha=1;
-  if(state.phase==='aim')drawAim();drawPlayer();
+  if(state.phase==='aim'&&dragging)drawAim();drawPlayer();
   if(state.phase==='flying'){for(const b of state.bullets)if(b.alive){ctx.shadowBlur=18;ctx.shadowColor=b.color;circle(b.x,b.y,selectedAmmo==='scatter'?3.5:5,'#fbffde');ctx.shadowBlur=0;if(b.explosionReady){ctx.strokeStyle=b.color;ctx.lineWidth=2;ctx.beginPath();ctx.arc(b.x,b.y,8,0,Math.PI*2);ctx.stroke();}}const living=state.bullets.filter(b=>b.alive),fraction=living.length?Math.max(...living.map(b=>Math.max(0,b.energy/b.maxEnergy))):0;ctx.fillStyle='#2e3d2e';ctx.fillRect(W/2-65,origin.y+32,130,3);ctx.fillStyle=ammoTypes[selectedAmmo].color;ctx.fillRect(W/2-65,origin.y+32,130*fraction,3);}
   for(const p of state.particles){ctx.globalAlpha=Math.min(1,p.life/.25);if(p.wood||p.toy){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.angle);ctx.fillStyle=p.color;ctx.fillRect(-p.width/2,-p.height/2,p.width,p.height);ctx.restore();}else circle(p.x,p.y,2.5,p.color);}ctx.globalAlpha=1;ctx.font='bold 13px "Microsoft YaHei",sans-serif';ctx.textAlign='center';for(const l of state.labels){ctx.globalAlpha=Math.min(1,l.life*3);ctx.fillStyle='#553779';ctx.fillText(l.text,l.x,l.y);}ctx.globalAlpha=1;ctx.restore();}
  function drawAim(){const dx=aim.x,dy=aim.y;let t=Infinity,axis='y';if(dx>0)t=(bounds.right-4-origin.x)/dx;if(dx<0)t=(bounds.left+4-origin.x)/dx;const ty=(bounds.top+4-origin.y)/dy;if(ty<t){t=ty;axis='y';}else axis='x';let hitWall=false;for(const w of state.walls){if(w.alive===false||(ammoTypes[selectedAmmo].armorPiercing&&w.type==='obstacle'))continue;if(dx===0&&(origin.x<w.x-4||origin.x>w.x+w.w+4))continue;const tx1=dx===0?-Infinity:(w.x-4-origin.x)/dx,tx2=dx===0?Infinity:(w.x+w.w+4-origin.x)/dx,ty1=(w.y-4-origin.y)/dy,ty2=(w.y+w.h+4-origin.y)/dy;const nearX=Math.min(tx1,tx2),farX=Math.max(tx1,tx2),nearY=Math.min(ty1,ty2),farY=Math.max(ty1,ty2),near=Math.max(nearX,nearY);if(near>0&&near<Math.min(farX,farY)&&near<t){t=near;axis=nearX>nearY?'x':'y';hitWall=true;}}
@@ -504,16 +539,79 @@
  function point(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
  function setAim(e){const p=point(e),dx=p.x-origin.x,dy=Math.min(-30,p.y-origin.y),len=Math.hypot(dx,dy);aim={x:dx/len,y:dy/len};}
  canvas.addEventListener('pointerdown',e=>{if(!gameEntered||state.phase!=='aim')return;dragging=true;canvas.setPointerCapture(e.pointerId);setAim(e);});canvas.addEventListener('pointermove',e=>{if(dragging)setAim(e);});canvas.addEventListener('pointerup',e=>{if(!dragging)return;setAim(e);dragging=false;shoot();});canvas.addEventListener('pointercancel',()=>dragging=false);
- $('retry').onclick=()=>{tone('ui');load(state.index,true);};$('resultAction').onclick=()=>{tone('ui');const won=!state.enemies.some(e=>e.alive);load(won?nextLevel(state.index):state.index,!won);};document.addEventListener('keydown',e=>{if(e.key.toLowerCase()==='r'&&e.target.tagName!=='SELECT')load(state.index,true);});
- $('openLevels').onclick=()=>{const panel=$('levelPanel');panel.open=!panel.open;$('openLevels').setAttribute('aria-expanded',String(panel.open));if(panel.open)panel.scrollIntoView?.({behavior:'smooth',block:'nearest'});};
- $('levelPanel').addEventListener('toggle',()=>{$('openLevels').setAttribute('aria-expanded',String($('levelPanel').open));if($('levelPanel').open)$('closeLevels')?.focus?.();});
- if($('closeLevels'))$('closeLevels').onclick=()=>{$('levelPanel').open=false;$('openLevels').focus?.();};
- document.addEventListener('keydown',e=>{if(!$('levelPanel').open)return;if(e.key==='Escape'){$('levelPanel').open=false;$('openLevels').focus?.();}if(e.key==='Tab'){const controls=Array.from(document.querySelectorAll('aside button,aside summary,aside input')).filter(el=>!el.disabled&&el.getClientRects().length),first=controls[0],last=controls[controls.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}});
- levels.forEach((l,i)=>{if(i===0||l.group!==levels[i-1].group){const title=document.createElement('h3');title.className='level-group-title';title.dataset.group=l.group;title.innerHTML=`<span>${levelGroups[l.group].name}</span><small>${groupCounts[l.group]} 关</small>`;$('levels').append(title);}const b=document.createElement('button');b.className='level-button';b.dataset.levelIndex=String(i);b.dataset.group=l.group;b.innerHTML=`<span class="number">${String(l.number).padStart(2,'0')}</span><span><strong>${l.name.split(' · ')[1]}</strong><small>${l.sub}</small></span>`;b.onclick=()=>{load(i);$('levelPanel').open=false;};$('levels').append(b);});
+ $('resultRetry').onclick=()=>{tone('ui');load(state.index,true);};$('retry').onclick=()=>{tone('ui');load(state.index,true);};$('resultAction').onclick=()=>{tone('ui');const won=!state.enemies.some(e=>e.alive);load(won?nextLevel(state.index):state.index,!won);};document.addEventListener('keydown',e=>{if(e.key.toLowerCase()==='r'&&e.target.tagName!=='SELECT')load(state.index,true);});
+ function syncMenus(){const levelsOpen=$('levelPanel').open,settingsOpen=!$('settingsDialog').hidden;$('openLevels').setAttribute('aria-expanded',String(levelsOpen));$('openSettings').setAttribute('aria-expanded',String(settingsOpen));$('menuBackdrop').hidden=!levelsOpen&&!settingsOpen;}
+ function closeMenus(){const settingsOpen=!$('settingsDialog').hidden;$('levelPanel').open=false;$('settingsDialog').hidden=true;syncMenus();$(settingsOpen?'openSettings':'openLevels').focus?.();}
+ function openMenu(kind){dragging=false;const settings=kind==='settings';$('levelPanel').open=!settings;$('settingsDialog').hidden=!settings;syncMenus();$(settings?'settingsDialog':'levelsDialog').scrollTop=0;$(settings?'closeSettings':'closeLevels').focus?.();if(!settings)refreshLevelSelection();}
+ $('openLevels').onclick=()=>openMenu('levels');$('openSettings').onclick=()=>openMenu('settings');
+ $('levelPanel').addEventListener('toggle',syncMenus);
+ $('closeLevels').onclick=closeMenus;$('closeSettings').onclick=closeMenus;$('menuBackdrop').onclick=closeMenus;
+ document.addEventListener('keydown',e=>{const selector=$('levelPanel').open?'#levelsDialog':!$('settingsDialog').hidden?'#settingsDialog':null;if(!selector)return;if(e.key==='Escape'){e.preventDefault();closeMenus();}if(e.key==='Tab'){const controls=Array.from(document.querySelectorAll(selector+' button,'+selector+' summary,'+selector+' input')).filter(el=>!el.disabled&&el.getClientRects().length),first=controls[0],last=controls[controls.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}});
+
+ levels.forEach((l,i)=>{if(l.group==='tutorial')return;if(i===0||l.group!==levels[i-1].group){const title=document.createElement('h3');title.className='level-group-title';title.dataset.group=l.group;title.innerHTML=`<span>${levelGroups[l.group].name}</span><small>${groupCounts[l.group]} 关</small>`;$('levels').append(title);}const b=document.createElement('button');b.className='level-button';b.dataset.levelIndex=String(i);b.dataset.group=l.group;b.innerHTML=`<span class="number">${String(l.number).padStart(2,'0')}</span><span><strong>${l.name.split(' · ')[1]}</strong><small>${l.sub}</small></span>`;b.onclick=()=>{load(i);closeMenus();};$('levels').append(b);});
  Object.entries(ammoTypes).forEach(([key,type])=>{const b=document.createElement('button');b.className='ammo-button';b.dataset.ammo=key;b.style.setProperty('--bullet-color',type.color);b.innerHTML=`<img class="ammo-icon" data-asset="toy-${key}" alt=""><span><strong>${{normal:'普通',fast:'穿甲',explosive:'爆炸',scatter:'散弹'}[key]}</strong><small>${type.sub}</small><b class="ammo-count" id="stock-${key}"></b></span>`;b.onclick=()=>selectAmmo(key);$('ammoChoices').append(b);});
  load(Math.max(0,levels.findIndex(l=>l.group==='formal')));let lastShotCount=stats.shots;function frame(time){let dt=Math.min(.032,(time-lastTime)/1000||.016);lastTime=time;if(lastShotCount!==stats.shots){lastShotCount=stats.shots;recoilUntil=state.time+.12;}if(slow>0){slow-=dt;dt*=.35;}update(dt);draw();requestAnimationFrame(frame);}requestAnimationFrame(frame);
  prepareAssets();
  // Small diagnostic surface for repeatable shot and physics verification.
- window.demo={get gameEntered(){return gameEntered;},get assetsReady(){return assetsReady;},get state(){return state;},get stage(){return {W,H,origin,bounds};},get playerRig(){return playerRig();},courtyardDetails,get courtyardDecor(){return courtyardCache?.details.map(item=>({...item}))||[];},enemyIdlePose,shieldPeekPose,shadowGeometry,terrainVolume,shieldGeometry,rotorContact,rotorRay,rotorRules,comparison,levels,ammoTypes,scoreRules,selectAmmo,load,shootAt(x,y){if(state.phase!=='aim')return;const dx=x-origin.x,dy=Math.min(-30,y-origin.y),length=Math.hypot(dx,dy);aim={x:dx/length,y:dy/length};shoot();},step:update,render:draw,stats};
+ window.demo={get gameEntered(){return gameEntered;},get assetsReady(){return assetsReady;},get state(){return state;},get stage(){return {W,H,origin,bounds};},get playerRig(){return playerRig();},courtyardDetails,get courtyardDecor(){return courtyardCache?.details.map(item=>({...item}))||[];},enemyIdlePose,shieldPeekPose,shadowGeometry,terrainVolume,shieldGeometry,rotorContact,rotorRay,rotorRules,comparison,levels,ammoTypes,scoreRules,starsForScore,selectAmmo,load,shootAt(x,y){if(state.phase!=='aim')return;const dx=x-origin.x,dy=Math.min(-30,y-origin.y),length=Math.hypot(dx,dy);aim={x:dx/length,y:dy/length};shoot();},step:update,render:draw,stats};
  window.demo.enemyGrounding=enemyGrounding;
+})();
+
+/* The native ammo buttons remain the source of inventory and selection state. */
+(()=>{
+ 'use strict';
+ if(typeof MutationObserver==='undefined')return;
+ const $=id=>document.getElementById(id),trigger=$('ammoCurrent'),picker=$('ammoPicker'),backdrop=$('ammoBackdrop'),choices=$('ammoChoices');
+ let opened=false;
+ function close(restoreFocus=true){
+  if(!opened)return;
+  opened=false;picker.hidden=true;backdrop.hidden=true;trigger.setAttribute('aria-expanded','false');
+  if(restoreFocus&&!trigger.disabled)trigger.focus();
+ }
+ function sync(){
+  const buttons=[...choices.querySelectorAll('.ammo-button')],configured=buttons.filter(b=>!b.hidden),selected=buttons.find(b=>b.classList.contains('active'));
+  if(!selected||!window.demo)return;
+  const multiple=configured.filter(b=>demo.state.inventory[b.dataset.ammo]>0).length>1,aiming=demo.state.phase==='aim',name=selected.querySelector('strong').textContent,stock=selected.querySelector('.ammo-count').textContent;
+  $('currentAmmoName').textContent=name+' '+stock;
+  const src=selected.querySelector('img').getAttribute('src');
+  if(src&&$('currentAmmoIcon').getAttribute('src')!==src)$('currentAmmoIcon').src=src;
+  trigger.classList.toggle('can-switch',multiple);
+  $('ammoSwitchHint').hidden=!multiple;
+  trigger.disabled=!multiple||!aiming;
+  trigger.setAttribute('aria-label',name+'，剩余'+demo.state.inventory[selected.dataset.ammo]+'发'+(multiple?'，点击展开子弹列表':''));
+  trigger.title=multiple?'点击换弹':'';
+  if(multiple)trigger.setAttribute('aria-haspopup','dialog');else trigger.removeAttribute('aria-haspopup');
+  for(const button of buttons){
+   let badge=button.querySelector('.ammo-option-status');
+   if(!badge){badge=document.createElement('span');badge.className='ammo-option-status';button.append(badge);}
+   const label=demo.state.inventory[button.dataset.ammo]<=0?'已用完':button===selected?'使用中':'点击选择';
+   if(badge.textContent!==label)badge.textContent=label;
+  }
+  if(opened&&(!multiple||!aiming))close(false);
+ }
+ trigger.addEventListener('click',()=>{
+  if(opened){close();return;}
+  if(trigger.disabled)return;
+  opened=true;picker.hidden=false;backdrop.hidden=false;trigger.setAttribute('aria-expanded','true');
+  (choices.querySelector('.ammo-button.active:not(:disabled)')||$('closeAmmoPicker')).focus();
+ });
+ choices.addEventListener('click',event=>{const button=event.target.closest('.ammo-button');if(button&&!button.disabled){sync();close();}});
+ $('closeAmmoPicker').addEventListener('click',()=>close());
+ backdrop.addEventListener('click',()=>close());
+ for(const id of ['retry','openSettings','openLevels','resultRetry','resultAction'])$(id).addEventListener('click',()=>close(false));
+ document.addEventListener('keydown',event=>{
+  if(!opened)return;
+  if(event.key.toLowerCase()==='r'){close(false);return;}
+  if(event.key==='Escape'){event.preventDefault();close();}
+  if(event.key==='Tab'){
+   const controls=[...picker.querySelectorAll('button')].filter(el=>!el.disabled&&el.getClientRects().length),first=controls[0],last=controls[controls.length-1];
+   if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+   else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+  }
+ });
+ // Observe only game-owned fields; picker labels never trigger another sync.
+ new MutationObserver(sync).observe(choices,{subtree:true,attributes:true,attributeFilter:['class','disabled','hidden','src'],characterData:true});
+ // textContent writes replace stock children, so observe those separately.
+ for(const stock of choices.querySelectorAll('.ammo-count'))new MutationObserver(sync).observe(stock,{childList:true});
+ sync();
 })();

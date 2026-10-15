@@ -63,7 +63,17 @@ b=targetRoom();demo.state.enemies.push(enemy(origin.x,origin.y-100,'bomb'),enemy
 b=targetRoom();demo.state.barrels=[{id:0,x:origin.x,y:origin.y-100,r:14,alive:true}];demo.step(.16);assert.equal(demo.state.score,0,'Empty barrel explosion gives no score');
 fire('normal',5);const frontal=demo.state.enemies.find(e=>e.type==='shield');demo.state.enemies=[frontal,...unreachable()];demo.state.barrels=[];demo.state.walls=[];const sb=demo.state.bullet,face=demo.shieldGeometry(frontal);sb.x=face.x;sb.y=face.y+face.r+sb.r+1;sb.vx=0;sb.vy=-800;demo.step(.008);assert.equal(demo.state.score,0,'Shield block is not an effective hit');assert.ok(sb.vy>0,'Visible shield disk reflects a front contact');
 fire('normal',CH,-76);run();assert.ok(demo.state.score>0);assert.equal(demo.comparison[CH].lastScore,demo.state.score);assert.ok(demo.comparison[CH].bestScore>=demo.state.score);assert.ok(get('resultBreakdown').textContent.includes('连击奖励'));const record=demo.comparison[CH].bestScore;get('retry').onclick();assert.equal(demo.state.score,0);assert.equal(demo.state.hitCount,0);assert.equal(demo.state.maxCombo,0);assert.equal(demo.comparison[CH].bestScore,record);demo.load(0);assert.equal(demo.state.score,0);
-console.log('PASS: base score, escalating combo bonus, timeout reset, overlap/dead target deduplication, helmet scoring, blast chain scoring, no environment/block score, score HUD/result/records and retry reset');
+// Clear a real lesson with mixed unused inventory; a scatter round counts once.
+demo.load(0);Object.assign(demo.state.inventory,{normal:2,fast:1,explosive:2,scatter:1});demo.selectAmmo('normal');demo.shootAt(origin.x,30);run();
+assert.equal(demo.state.ammoBonus,180);assert.equal(demo.state.score,demo.state.baseScore+demo.state.comboBonus+180);assert.equal(demo.state.inventory.scatter,1);assert.equal(get('scoreHud').textContent,`得分 ${demo.state.score}`);assert.ok(get('resultBreakdown').textContent.includes('省弹奖励 180 分'));assert.ok(get('resultDesc').textContent.includes('剩余 5 发'));assert.equal(demo.comparison[0].lastScore,demo.state.score);assert.ok(demo.comparison[0].bestScore>=demo.state.score);
+const awardedScore=demo.state.score,awardedTries=demo.comparison[0].tries;for(let i=0;i<10;i++)demo.step(.1);assert.equal(demo.state.score,awardedScore);assert.equal(demo.comparison[0].tries,awardedTries);
+get('retry').onclick();assert.equal(demo.state.ammoBonus,0);assert.equal(demo.state.score,0);assert.equal(demo.state.inventory.normal,1);
+for(const [type,value] of Object.entries({normal:20,fast:30,explosive:40,scatter:50})){demo.load(0);demo.state.inventory[type]++;demo.selectAmmo('normal');demo.shootAt(origin.x,30);run();assert.equal(demo.state.ammoBonus,value,type+' unused round value');assert.equal(demo.state.score,45+value);assert.equal(demo.state.inventory[type],1);}
+demo.load(0);
+demo.selectAmmo('normal');demo.shootAt(origin.x,30);run();assert.equal(demo.state.ammoBonus,0,'No bonus with no unused rounds');
+demo.load(2);demo.selectAmmo('normal');demo.shootAt(demo.state.enemies[0].x,demo.state.enemies[0].y);while(['flying','settling'].includes(demo.state.phase))demo.step(.008);assert.equal(demo.state.phase,'aim');assert.equal(demo.state.ammoBonus,0,'Unfinished round cannot earn unused-ammo bonus');assert.equal(demo.state.score,10);
+demo.load(0);demo.selectAmmo('normal');demo.state.enemies=unreachable();demo.shootAt(origin.x,30);run();assert.equal(demo.state.ammoBonus,0,'Failure gives no bonus');
+console.log('PASS: hit/combo scoring, unused-ammo success bonus, mixed rounds including scatter, no interim/failure bonus, HUD/result/records, no repeated settlement and retry reset');
 
 // Geometry used by the actual sprite is the same one used by projectile contact.
 function shieldRoom(ammo='normal'){const bullet=targetRoom(ammo),target=enemy(origin.x,origin.y-140,'shield');demo.state.enemies.push(target);return{bullet,target,face:demo.shieldGeometry(target)};}
@@ -97,6 +107,22 @@ const room=terrainRoom('obstacle','scatter');const pellet2=demo.state.bullets[1]
 for(const source of ['bomb','barrel']){b=targetRoom();const y=origin.y-100;demo.state.walls=[{id:0,type:'obstacle',x:origin.x+30,y,w:25,h:22,hp:2,alive:true},{id:1,type:'brick',x:origin.x+50,y,w:200,h:22,hp:1,alive:true},{id:2,type:'iron',x:origin.x+20,y:y-30,w:25,h:22,hp:Infinity,alive:true},{id:3,type:'brick',x:origin.x+200,y:y-50,w:25,h:22,hp:1,alive:true}];if(source==='bomb')demo.state.enemies.push(enemy(origin.x,y,'bomb'));else demo.state.barrels=[{id:0,x:origin.x,y,r:14,alive:true}];demo.step(.16);assert.equal(demo.state.walls[0].alive,false);assert.equal(demo.state.walls[1].alive,false,'Blast uses nearest rectangle point, not center');assert.equal(demo.state.walls[2].alive,true);assert.equal(demo.state.walls[3].alive,true);assert.equal(demo.state.terrainDestroyed,2);assert.equal(demo.state.score,source==='bomb'?10:0,'Terrain destruction gives no score');}
 demo.load(CH);assert.deepEqual(Array.from(demo.state.walls,w=>w.type),['obstacle','brick','iron']);const intact=JSON.stringify(demo.state.walls);demo.state.walls[0].hp=0;demo.state.walls[0].alive=false;get('retry').onclick();assert.equal(JSON.stringify(demo.state.walls),intact,'Retry restores all terrain');
 console.log('PASS: two-hit obstacle, first-hit reflection and final-hit passage, contact deduplication, independent pellets, bullet-proof brick/iron, explosive impact, bomb/barrel terrain blast, nearest rectangle range, iron immunity, no terrain score and retry restoration');
+
+// Score thresholds are inclusive, success-gated, and monotonic for every level.
+for(let index=0;index<demo.levels.length;index++){const limits=demo.levels[index].starScores;assert.equal(limits.length,2);const [two,three]=limits;assert.ok(Number.isFinite(two)&&two>0&&three>=two);assert.equal(demo.starsForScore(index,0,true),1);assert.equal(demo.starsForScore(index,two-1,true),1);assert.equal(demo.starsForScore(index,two,true),two===three?3:2);assert.equal(demo.starsForScore(index,three-1,true),two===three?1:2);assert.equal(demo.starsForScore(index,three,true),3);assert.equal(demo.starsForScore(index,three+10000,false),0);}
+function playRatedFormal(angles){demo.load(11);demo.selectAmmo('normal');for(const angle of angles){const a=angle*Math.PI/180;demo.shootAt(origin.x+Math.sin(a)*180,origin.y-Math.cos(a)*180);let steps=0;while(['flying','settling'].includes(demo.state.phase)&&steps++<2500)demo.step(.008);assert.ok(steps<2500);}assert.equal(demo.state.phase,'result');}
+playRatedFormal([-76,-68]);assert.equal(demo.state.score,50);assert.equal(demo.state.stars,1);assert.ok(get('resultRatingHint').textContent.includes('还差 10 分'));assert.equal(get('resultRetry').hidden,false);
+playRatedFormal([0,45]);assert.equal(demo.state.score,70);assert.equal(demo.state.stars,2);assert.ok(get('resultRatingHint').textContent.includes('还差 20 分'));
+playRatedFormal([45]);assert.equal(demo.state.stars,3);assert.equal(demo.comparison[11].bestStars,3);assert.equal(demo.comparison[11].lastStars,3);assert.equal(get('resultStars').hidden,false);assert.ok(get('resultStars').innerHTML.match(/earned/g).length===3);
+const ratedTries=demo.comparison[11].tries;demo.step(1);assert.equal(demo.comparison[11].tries,ratedTries);
+get('resultRetry').onclick();assert.equal(demo.state.index,11);assert.equal(demo.state.stars,0);assert.equal(demo.state.score,0);assert.equal(demo.state.inventory.normal,2);assert.equal(demo.comparison[11].bestStars,3);
+playRatedFormal([0,0]);assert.equal(demo.state.stars,0);assert.equal(demo.comparison[11].lastStars,0);assert.equal(demo.comparison[11].bestStars,3);assert.equal(get('resultStars').hidden,true);assert.equal(get('resultRetry').hidden,true);assert.ok(get('comparisonRows').innerHTML.includes('★★★'));
+demo.load(12);assert.equal(demo.state.stars,0);assert.equal(demo.comparison[11].bestStars,3);
+console.log('PASS: all star thresholds, failure gating, real one/two/three-star routes, score gap, replay/reset and persistent best stars');
 require('./campaign-check.cjs');
 require('./rotor-check.cjs');
 require('./early-campaign-check.cjs');
+
+require('./campaign-extension-check.cjs');
+
+require('./late-campaign-check.cjs');

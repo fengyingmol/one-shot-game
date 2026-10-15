@@ -17,9 +17,9 @@ async function main(){
   assert.equal(await run('gameAudio.state.context'),'running');assert.ok(await run('gameAudio.state.rms>.001'));assert.equal(await run('demo.state.shotsUsed'),0,'Music before first shot');assert.equal(await run('gameAudio.state.musicStarts'),1);
   await run('demo.load(0)');await click('#game');assert.ok(await run('gameAudio.state.played.shot>0'),'First shot SFX');
   await run('demo.load(2);demo.load(0)');assert.equal(await run('gameAudio.state.musicStarts'),1);
-  await click('#sound');await wait('gameAudio.state.context==="suspended"');await click('#retry');assert.equal(await run('gameAudio.state.musicPlaying'),false);assert.equal(await run('gameAudio.state.context'),'suspended');
-  await click('#sound');await wait('gameAudio.state.musicPlaying');assert.equal(await run('gameAudio.state.musicStarts'),2);
-  await click('#openLevels');await run('audioPanel.open=true');await click('#musicToggle');await pause(100);assert.equal(await run('gameAudio.state.musicPlaying'),false);assert.equal(await run('gameAudio.state.sfx'),true);
+  await click('#openSettings');await click('#sound');await wait('gameAudio.state.context==="suspended"');await click('#closeSettings');await click('#retry');assert.equal(await run('gameAudio.state.musicPlaying'),false);assert.equal(await run('gameAudio.state.context'),'suspended');
+  await click('#openSettings');await click('#sound');await wait('gameAudio.state.musicPlaying');assert.equal(await run('gameAudio.state.musicStarts'),2);
+  await click('#musicToggle');await pause(100);assert.equal(await run('gameAudio.state.musicPlaying'),false);assert.equal(await run('gameAudio.state.sfx'),true);
   await click('#musicToggle');await wait('gameAudio.state.musicPlaying');await click('#sfxToggle');assert.equal(await run('gameAudio.state.sfx'),false);
   await run('Object.defineProperty(document,"hidden",{configurable:true,get:()=>true});document.dispatchEvent(new Event("visibilitychange"))');await wait('gameAudio.state.context==="suspended"');await run('Object.defineProperty(document,"hidden",{configurable:true,get:()=>false});document.dispatchEvent(new Event("visibilitychange"))');await wait('gameAudio.state.context==="running"');assert.equal(await run('gameAudio.state.musicStarts'),3);
   await run('audioVolume.value=0;audioVolume.dispatchEvent(new Event("input",{bubbles:true}))');await pause(450);assert.ok(await run('gameAudio.state.rms<.0001'));assert.equal(errors.length,0);

@@ -1,7 +1,7 @@
 (() => {
  'use strict';
  const score=window.OneShotScore, $=id=>document.getElementById(id);
- let context,master,musicGain,fxGain,analyser,musicBuffer,musicSource,pendingMusic,enabledMusic=true,enabledFx=true,unlocked=false,volume=.55,revision=0;
+ let context,master,musicGain,fxGain,analyser,musicBuffer,musicSource,pendingMusic,enabledMusic=true,enabledFx=true,unlocked=false,volume=.75,revision=0;
  const buffers=new Map(),lastEffect=new Map(),voices=new Set(),played={},status={musicStarts:0,error:''};
  function setup(){if(context)return;const Constructor=window.AudioContext||window.webkitAudioContext;if(!Constructor)throw Error('当前浏览器不支持游戏声音');context=new Constructor();master=context.createGain();master.gain.value=volume;const limiter=context.createDynamicsCompressor();limiter.threshold.value=-16;limiter.knee.value=20;limiter.ratio.value=4;musicGain=context.createGain();musicGain.gain.value=.25;fxGain=context.createGain();fxGain.gain.value=.7;analyser=context.createAnalyser();analyser.fftSize=1024;musicGain.connect(limiter);fxGain.connect(limiter);limiter.connect(master);master.connect(analyser);analyser.connect(context.destination);}
  function buffer(pcm){const b=context.createBuffer(2,pcm.left.length,pcm.rate);b.copyToChannel(pcm.left,0);b.copyToChannel(pcm.right,1);return b;}

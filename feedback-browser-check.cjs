@@ -26,6 +26,11 @@ async function main(){
    assert.equal(await run('(()=>{const before=JSON.stringify(demo.state.enemies),e=demo.state.enemies[0],poses=Array.from({length:120},(_,n)=>demo.enemyIdlePose(e,n*.05));return JSON.stringify(demo.state.enemies)===before&&poses.some(p=>Math.abs(p.angle)>.06)&&poses.some(p=>p.lift<-1.7)&&poses.every(p=>Math.abs(p.angle)<.1&&p.lift>=-1.8&&p.lift<=0&&p.sx>.92&&p.sx<1.08&&p.sy>.92&&p.sy<1.08)})()'),true,'Breathing / cheeky tilt / hop are small pure visual poses');
    await capture(`demo-normal-pilot-${width}.png`);
    await run('demo.step(.6)');await capture(`demo-normal-idle-${width}.png`);
+
+   const normalHold=await run('(()=>{const r=game.getBoundingClientRect();return{x:r.x+r.width/2,y:r.y+r.height/2}})()'),normalPose=await run('demo.enemyIdlePose(demo.state.enemies[0],1)'),normalPhysics=await run('JSON.stringify(demo.state.enemies)');
+   await send('Input.dispatchMouseEvent',{type:'mousePressed',...normalHold,button:'left',clickCount:1});assert.deepEqual(await run('demo.enemyIdlePose(demo.state.enemies[0],1)'),normalPose,'Normal idle keeps full motion while aiming');await capture(`demo-normal-aim-a-${width}.png`);
+   const heldNormalA=await run('demo.enemyIdlePose(demo.state.enemies[0])');await run('for(let n=0;n<30;n++)demo.step(.03)');assert.notDeepEqual(await run('demo.enemyIdlePose(demo.state.enemies[0])'),heldNormalA,'Normal pose advances while held');await capture(`demo-normal-aim-b-${width}.png`);assert.equal(await run('JSON.stringify(demo.state.enemies)'),normalPhysics);
+   await run('game.dispatchEvent(new PointerEvent("pointercancel"))');await send('Input.dispatchMouseEvent',{type:'mouseReleased',...normalHold,button:'left',clickCount:1});assert.equal(await run('demo.state.shotsUsed'),0);
    await run('demo.load(2);window.__spriteDraws=[];demo.render()');
    assert.equal(await run('(()=>{const e=demo.state.enemies[0],before=JSON.stringify(demo.state),poses=Array.from({length:160},(_,n)=>demo.enemyIdlePose(e,n*.05)),bare={...e,hp:1};return before===JSON.stringify(demo.state)&&poses.some(p=>p.angle>.06)&&poses.some(p=>p.angle<-.06)&&poses.some(p=>p.lift<-1.35)&&poses.every(p=>Math.abs(p.angle)<.1&&p.lift>=-1.4&&p.lift<=0&&p.sx===1&&p.sy===1)&&JSON.stringify(demo.enemyIdlePose(e,2))===JSON.stringify(demo.enemyIdlePose(bare,2))&&JSON.stringify(demo.enemyIdlePose({...e,alive:false},2))===JSON.stringify({angle:0,lift:0,sx:1,sy:1})})()'),true,'Whole toy gently rocks and bobs, keeps rigid proportions, same bare pose and immutable physics');
    await capture(`demo-windup-idle-a-${width}.png`);const idleA=await run('demo.enemyIdlePose(demo.state.enemies[0])');
@@ -34,7 +39,7 @@ async function main(){
    await run('for(let n=0;n<78;n++)demo.step(.03)');await capture(`demo-windup-idle-hop-${width}.png`);assert.ok(await run('demo.enemyIdlePose(demo.state.enemies[0]).lift<-1.35'));
    const heldPoint=await run('(()=>{const r=game.getBoundingClientRect();return{x:r.x+r.width/2,y:r.y+r.height/2}})()'),calm=await run('demo.enemyIdlePose(demo.state.enemies[0],1)');
    await send('Input.dispatchMouseEvent',{type:'mousePressed',...heldPoint,button:'left',clickCount:1});
-   const held=await run('demo.enemyIdlePose(demo.state.enemies[0],1)');assert.ok(Math.abs(held.angle-calm.angle*.12)<1e-9,'Actual pointer hold reduces idle amplitude');
+   const held=await run('demo.enemyIdlePose(demo.state.enemies[0],1)');assert.ok(Math.abs(held.angle-calm.angle)<1e-9,'Actual pointer hold keeps full idle amplitude');await capture(`demo-windup-aim-${width}.png`);const heldHelmetA=await run('demo.enemyIdlePose(demo.state.enemies[0])'),heldHelmetState=await run('JSON.stringify(demo.state.enemies)');await run('for(let n=0;n<30;n++)demo.step(.03)');assert.notDeepEqual(await run('demo.enemyIdlePose(demo.state.enemies[0])'),heldHelmetA);assert.equal(await run('JSON.stringify(demo.state.enemies)'),heldHelmetState);
    await run('game.dispatchEvent(new PointerEvent("pointercancel"))');await send('Input.dispatchMouseEvent',{type:'mouseReleased',...heldPoint,button:'left',clickCount:1});assert.equal(await run('demo.state.shotsUsed'),0);
    await run('demo.load(2);window.__spriteDraws=[];demo.render()');
    assert.equal(await run('__newShadowGradients'),0,'Soft shadow masks are reused, not rebuilt per frame/level');
@@ -59,7 +64,7 @@ async function main(){
    assert.equal(await run('JSON.stringify(__spriteDraws.filter(d=>d.src.includes("toy-shield-peek-v1")).at(-1).args)'),fixedShield);
    assert.equal(await run('JSON.stringify(demo.state.enemies)'),shieldState);assert.equal(await run('JSON.stringify(demo.shieldGeometry(demo.state.enemies[0]))'),shieldFace);
    const p=await run('(()=>{const r=game.getBoundingClientRect();return{x:r.x+r.width/2,y:r.y+r.height/2}})()');
-   await send('Input.dispatchMouseEvent',{type:'mousePressed',...p,button:'left',clickCount:1});assert.equal(await run('demo.shieldPeekPose(demo.state.enemies[0]).x'),0,'Hide and pause peek while aiming');
+   await send('Input.dispatchMouseEvent',{type:'mousePressed',...p,button:'left',clickCount:1});assert.equal(await run('demo.shieldPeekPose(demo.state.enemies[0]).x'),12.5,'Keep peeking while aiming');await capture(`demo-shield-aim-a-${width}.png`);await run('for(let n=0;n<40;n++)demo.step(.03);window.__spriteDraws=[]');await capture(`demo-shield-aim-b-${width}.png`);assert.equal(await run('demo.shieldPeekPose(demo.state.enemies[0]).x'),0,'Peek cycle keeps advancing while held');assert.equal(await run('JSON.stringify(demo.state.enemies)'),shieldState);assert.equal(await run('JSON.stringify(demo.shieldGeometry(demo.state.enemies[0]))'),shieldFace);assert.equal(await run('JSON.stringify(__spriteDraws.filter(d=>d.src.includes("toy-shield-peek-v1")).at(-1).args)'),fixedShield);
    await run('game.dispatchEvent(new PointerEvent("pointercancel"))');await send('Input.dispatchMouseEvent',{type:'mouseReleased',...p,button:'left',clickCount:1});assert.equal(await run('demo.state.shotsUsed'),0);
    await fireAt(0);await run('for(let n=0;n<200&&!demo.state.bounces;n++)demo.step(.008)');
    assert.ok(await run('demo.state.bounces>0'));assert.equal(await run('demo.state.kills'),0);
@@ -90,7 +95,7 @@ async function main(){
   }
   for(const [width,height] of [[390,844],[320,568]]){
    await send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:3,mobile:true});
-   await run('demo.load(16);window.__wallBefore=JSON.stringify(demo.state.walls);window.__spriteDraws=[];demo.render()');
+   await run('demo.load(demo.levels.findIndex(l=>l.name==="效率测试 · 四区回廊"));window.__wallBefore=JSON.stringify(demo.state.walls);window.__spriteDraws=[];demo.render()');
    assert.equal(await run('JSON.stringify(demo.state.walls)===__wallBefore'),true,'Drawing raised faces must not move or mutate colliders');
    for(const type of ['obstacle','brick','iron']){
     const valid=await run(`(()=>{const w=demo.state.walls.find(w=>w.type===${JSON.stringify(type)}),v=demo.terrainVolume(w),file={obstacle:"toy-wood-satin-v2.webp",brick:"toy-limestone-v1.webp",iron:"toy-basalt-v1.webp"}[w.type],d=__spriteDraws.find(d=>d.src.endsWith(file)),a=d?.args;return !!a&&v.rise>0&&v.side>0&&v.rise<=Math.min(w.w,w.h)*.65&&Math.abs(a[0]-(w.x-v.side))<1e-8&&Math.abs(a[1]-(w.y-v.rise))<1e-8&&Math.abs(a[2]/d.width-a[3]/d.height)<1e-8})()`);
@@ -98,7 +103,7 @@ async function main(){
    }
    await capture(`demo-volume-${width}.png`);
    assert.equal(await run('(()=>{const r=game.getBoundingClientRect();return Math.abs(r.width/r.height-demo.stage.W/demo.stage.H)<.001&&document.documentElement.scrollWidth<=innerWidth})()'),true);
-   await run('demo.load(14);window.__spriteDraws=[];demo.render()');
+   await run('demo.load(demo.levels.findIndex(l=>l.name==="效率测试 · 分弹拆局"));window.__spriteDraws=[];demo.render()');
    assert.equal(await run('(()=>{const e=demo.state.enemies.find(e=>e.type==="shield"),shield=__spriteDraws.findIndex(d=>d.src.includes("toy-shield-peek-v1")),s=demo.shieldGeometry(e),depth=s.y+s.r;return shield>=0&&demo.state.walls.filter(w=>w.type==="brick").every(w=>{const v=demo.terrainVolume(w),index=__spriteDraws.findIndex(d=>d.src.includes("toy-limestone-v1.webp")&&Math.abs(d.args[0]-(w.x-v.side))<1e-8&&Math.abs(d.args[1]-(w.y-v.rise))<1e-8);return index>=0&&(w.y+w.h>depth?index>shield:index<shield)})})()'),true,'Occlusion follows shield geometry and actual wall depths');
   }
   await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
@@ -108,7 +113,7 @@ async function main(){
   await run('demo.load(5)');assert.equal(await run('JSON.stringify(demo.shieldPeekPose(demo.state.enemies[0],1))===JSON.stringify(demo.shieldPeekPose(demo.state.enemies[0],100))'),true,'Reduced motion uses a still peeking pose');
   await run('demo.load(6)');await fireAt(0);await run('for(let n=0;n<500&&!demo.state.kills;n++)demo.step(.008);demo.render()');
   assert.equal(await run('demo.state.particles.some(p=>p.toy)'),false);assert.equal(errors.length,0);
-  console.log('PASS: 390/320px normal sculpt sprite and pure idle breathing/tilt/hop, raised terrain, unchanged colliders, depth ordering, cached shadows, integrated helmet/shield, pointer shots, death/helmet/chain feedback, retry, reduced-motion and no runtime errors');
+  console.log('PASS: 390/320px normal/helmet/shield motion continues during real pointer aiming, immutable colliders and cancel without firing, normal sculpt sprite and pure idle breathing/tilt/hop, raised terrain, unchanged colliders, depth ordering, cached shadows, integrated helmet/shield, pointer shots, death/helmet/chain feedback, retry, reduced-motion and no runtime errors');
  }finally{await send('Emulation.setEmulatedMedia',{features:[]});await run('if(window.gameAudio?.state.music||window.gameAudio?.state.sfx)document.getElementById("sound").click()');await send('Page.reload');ws.close();}
 }
 main().catch(e=>{console.error(e);process.exitCode=1});

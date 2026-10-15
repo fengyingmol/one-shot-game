@@ -2,7 +2,7 @@ const vm=require('node:vm'),fs=require('node:fs'),assert=require('node:assert/st
 const elements=new Map(),buttons=[];
 const get=id=>{if(!elements.has(id))elements.set(id,{value:'800',style:{},classList:{toggle(){}},addEventListener(){},append(b){buttons.push(b)},setAttribute(){},getContext(){return {}}});return elements.get(id)};
 const sandbox={window:{},document:{getElementById:get,querySelectorAll(s){return buttons.filter(b=>'.'+b.className===s)},addEventListener(){},createElement(){return{dataset:{},style:{setProperty(){}},setAttribute(){},classList:{toggle(){}}}}},requestAnimationFrame(){},Math,console};
-vm.runInNewContext(fs.readFileSync('game.js','utf8'),sandbox);const demo=sandbox.window.demo,index=demo.levels.findIndex(l=>l.rotors?.length);
+vm.runInNewContext(fs.readFileSync('game.js','utf8'),sandbox);const demo=sandbox.window.demo,index=demo.levels.findIndex(l=>l.group==='test'&&l.rotors?.length);
 function settle(){let n=0;while(['flying','settling'].includes(demo.state.phase)&&n++<2500)demo.step(.008);assert.ok(n<2500)}
 demo.load(index);demo.shootAt(demo.stage.origin.x,50);settle();assert.equal(demo.state.kills,1);assert.equal(demo.state.rotors[0].turns,1);assert.equal(demo.state.rotors[0].angle,Math.PI/4);assert.equal(demo.state.inventory.normal,1);
 demo.shootAt(demo.stage.origin.x,50);settle();assert.equal(demo.state.kills,2);assert.equal(demo.state.rotors[0].turns,2);assert.equal(demo.state.phase,'result');get('retry').onclick();assert.equal(demo.state.rotors[0].angle,-Math.PI/4);assert.equal(demo.state.rotorTurns,0);
