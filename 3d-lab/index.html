@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>一发入魂 · 3D 小样</title>
+<link rel="stylesheet" href="./lab.css">
+<main id="stage" aria-label="拖动场地瞄准，松手开枪"></main>
+<header><span>一发入魂 <small>3D 小样</small></span><output id="status">准备模型…</output></header>
+<footer><p>拖动瞄准，松手开枪</p><div><button id="view">换个角度</button><button id="fire">开枪</button></div><a href="../index.html">返回正式游戏</a></footer>
+<div id="loading" role="status">正在准备 3D 场景…</div>
+<script type="module">import('./lab.js').catch(()=>{document.querySelector('#loading').textContent='3D 场景未能启动，请刷新或更换支持 WebGL2 的浏览器。';});</script>
+</html>

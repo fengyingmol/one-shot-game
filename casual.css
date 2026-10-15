@@ -28,3 +28,38 @@ aside{display:none;position:fixed;z-index:20;inset:60px max(12px,calc((100vw - 4
 .level-group-title{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;margin:8px 0 2px;padding:10px 4px 6px;font-size:15px;color:#58446e;border-bottom:1px solid #d8cfea}.level-group-title small{font-size:11px;font-weight:400;color:#786b83}.level-group-title[data-group="formal"]{color:#78551e;border-color:#e7cd82}.level-group-title[data-group="test"]{color:#5d6b78;border-color:#c7d2db}
 .level-button[data-group="formal"],.level-button[data-group="test"]{grid-column:1/-1}
 .arena-bottom{height:24px;min-height:24px;overflow:hidden}.arena-bottom #stateText{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.arena-bottom #combo{flex-shrink:0;white-space:nowrap}
+/* Scene-first shell: controls float in reserved edge bands, not over targets. */
+main{position:relative;padding:0;gap:0;min-height:460px;--edge-top:calc(64px + env(safe-area-inset-top));--edge-bottom:calc(92px + env(safe-area-inset-bottom))}
+header{display:contents}.brand{display:none}.game-layout{height:100%;margin:0}.play-column{position:relative;gap:0}
+.arena-wrap{height:100%;padding:var(--edge-top) 4px var(--edge-bottom);justify-content:center;background:radial-gradient(ellipse at center,#f9e9c9 0,#faf2df 65%,#eee4cc 100%);border-radius:0}
+canvas{margin:0;border-radius:12px}
+.arena-top{position:absolute;inset:0 0 auto;height:var(--edge-top);padding:calc(8px + env(safe-area-inset-top)) 60px 3px;justify-content:center;gap:3px;pointer-events:none}
+.arena-top #levelName{max-width:100%;padding:4px 9px;font-size:11px;background:#fffbf2de;box-shadow:0 2px 4px #6e593d12}
+.arena-stats{justify-content:center;gap:14px}#counter{font-size:12px}#scoreHud{font-size:16px}
+.arena-bottom{position:absolute;inset:auto 0 0;height:var(--edge-bottom);min-height:var(--edge-bottom);padding:5px 8px 68px;align-items:flex-start;line-height:19px;font-size:11px;pointer-events:none}
+#sound,#retry,#openLevels,.trajectory-button{position:absolute;z-index:5;width:44px;height:44px;min-height:44px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:15px;background:#fffbf1e8;box-shadow:0 3px 0 #baa77f60,0 5px 10px #66502c15;backdrop-filter:blur(6px)}
+#sound{top:calc(10px + env(safe-area-inset-top));right:10px;border:1px solid #bebcdb;background:#eeecffe8}
+#soundLabel{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#sound[aria-pressed="false"] .icon{opacity:.4}#sound[aria-pressed="true"]{background:#d6edce}
+.play-actions{display:contents}.play-actions button{font-size:10px;gap:2px;min-height:44px;border-radius:15px}.play-actions button span{display:none}
+#retry{top:calc(10px + env(safe-area-inset-top));left:10px;background:#ffe68de8}
+#openLevels{bottom:calc(12px + env(safe-area-inset-bottom));right:10px;flex-direction:column;background:#e5e0ffe8}#openLevels span{display:block}
+.ammo-panel{position:absolute;z-index:5;bottom:calc(10px + env(safe-area-inset-bottom));left:62px;right:62px;max-width:320px;margin:0 auto}
+.ammo-choices{gap:4px}.ammo-button{min-height:60px;height:60px;padding:3px 1px;border-radius:13px;max-width:100px;background:#fffaf0e8;backdrop-filter:blur(6px)}
+.ammo-icon{width:30px;height:29px}.ammo-button strong,.ammo-count{font-size:10px}.ammo-button span{gap:1px}
+.trajectory-button{bottom:calc(12px + env(safe-area-inset-bottom));left:10px;font-size:10px;text-align:center;line-height:14px;border:1px solid #d4c5a7;white-space:normal}
+.trajectory-button:disabled{display:flex;visibility:hidden;pointer-events:none}
+.trajectory-button{font-size:0;flex-direction:column;gap:1px}.trajectory-button::before{content:'↝';font-size:21px;line-height:20px}.trajectory-button::after{content:'轨迹';font-size:10px;line-height:12px}
+.dot.rotor{background:#edbf55;border:1px solid #927039;border-radius:3px;transform:rotate(-45deg)}
+/* Garden frame expands outward only. The interactive room stays contain-fit. */
+#gardenFrame{position:absolute;inset:0;z-index:1;width:100%;height:100%;max-width:none;margin:0;border-radius:0;box-shadow:none;background:transparent;pointer-events:none}
+.arena-top,.arena-bottom{z-index:3}
+#game{box-shadow:none;border-radius:0}
+@media(max-height:650px){main{padding:0;gap:0}.play-column{gap:0}}
+/* Lawn garden: keep the existing edge layout, give text a quiet reading surface. */
+.arena-wrap{background:#a4bf75}
+#game{background:#a4bf75}
+.arena-stats{align-self:center;flex:0 0 auto;width:max-content;max-width:100%;padding:1px 8px;background:#fffbeddf;border-radius:12px}
+.arena-top{flex-direction:column;flex-wrap:nowrap}
+.arena-bottom #stateText,.arena-bottom #combo{color:#334b35;background:#fffbeddf;border-radius:7px;padding:0 4px}
+.dot.brick{background:#c5b89b}.dot.iron{background:#58616a}

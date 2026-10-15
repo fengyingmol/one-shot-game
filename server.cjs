@@ -3,7 +3,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 const root = __dirname;
 const host = process.env.ONE_SHOT_HOST || '127.0.0.1';
+const port = Number(process.env.ONE_SHOT_PORT || 4180);
 const runtimeFiles = new Set(['index.html','style.css','casual.css','game.js','soundtrack.js','audio.js']);
+['player-bootstrap.js','player-model.js','player-renderer.js','garden-frame.js'].forEach(file=>runtimeFiles.add(file));
+['index.html','lab.css','lab.js','vendor/three.module.js','vendor/three.core.js','vendor/LICENSE'].forEach(file=>runtimeFiles.add('3d-lab/'+file));
 const types = {'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.webp':'image/webp','.woff2':'font/woff2','.wav':'audio/wav'};
 http.createServer((req,res)=>{
  let filename;
@@ -14,4 +17,4 @@ http.createServer((req,res)=>{
  // LAN preview serves game resources only, never Git data, tools or profiles.
  if(!runtimeFiles.has(relative)&&!(relative.startsWith('assets/')&&!relative.split('/').some(part=>part.startsWith('.'))&&/\.(png|webp|svg|wav|woff2)$/i.test(relative))){res.writeHead(403);return res.end('Not public');}
  fs.readFile(filename,(err,data)=>{if(err){res.writeHead(404);return res.end('Not found');}res.writeHead(200,{'Content-Type':types[path.extname(filename)]||'application/octet-stream','Cache-Control':'no-store'});res.end(data);});
-}).listen(4180,host,()=>console.log(`Demo listening on ${host}:4180`));
+}).listen(port,host,()=>console.log(`Demo listening on ${host}:${port}`));

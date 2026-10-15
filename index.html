@@ -1,23 +1,23 @@
 <!doctype html>
 <html lang="zh-CN">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#faf5e9"><title>一发入魂 · 玩具小院</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="casual.css"></head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#faf5e9"><title>一发入魂 · 玩具小院</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="casual.css"></head>
 <body class="loading">
 <style>
 body.loading main{visibility:hidden;pointer-events:none}#loadingScreen{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:#faf5e9;color:#34344b;font-family:system-ui,sans-serif}#loadingScreen[hidden]{display:none}.loading-card{width:min(280px,80vw);text-align:center}.loading-mark{font-size:56px}.loading-card h1{font-size:28px;margin:16px 0 8px}.loading-card progress{width:100%;height:18px;accent-color:#8f79de}.loading-card p{font-size:14px;line-height:1.6}.loading-card button{padding:12px 28px;background:#ffe17c;border:2px solid #34344b;border-radius:16px;color:#34344b;font-size:16px}.loading-card button[hidden]{display:none}
 </style>
-<section id="loadingScreen" aria-label="加载游戏"><div class="loading-card"><div class="loading-mark" aria-hidden="true">🎯</div><h1>一发入魂</h1><p>正在准备玩具小院</p><progress id="loadingProgress" max="15" value="0" aria-label="游戏素材加载进度"></progress><p id="loadingStatus" role="status">准备加载…</p><button id="loadingRetry" hidden>重新加载</button><noscript>请开启浏览器 JavaScript 后重新打开游戏。</noscript></div></section>
+<section id="loadingScreen" aria-label="加载游戏"><div class="loading-card"><div class="loading-mark" aria-hidden="true">🎯</div><h1>一发入魂</h1><p>正在准备玩具小院</p><progress id="loadingProgress" max="15" value="0" aria-label="游戏素材加载进度"></progress><p id="loadingStatus" role="status">准备加载…</p><button id="loadingStart" hidden>点击进入游戏</button><button id="loadingRetry" hidden>重新加载</button><noscript>请开启浏览器 JavaScript 后重新打开游戏。</noscript></div></section>
 <main inert>
- <header><a class="brand" href="./"><img class="title-art" data-asset="toy-title" alt="一发入魂"><span>玩具小院</span></a><button id="sound" aria-pressed="false"><img class="icon" src="assets/icons/volume-up.svg" alt=""><span id="soundLabel">声音：关</span></button></header>
+ <header><a class="brand" href="./"><img class="title-art" data-asset="toy-title" alt="一发入魂"><span>玩具小院</span></a><button id="sound" aria-pressed="true"><img class="icon" src="assets/icons/volume-up.svg" alt=""><span id="soundLabel">声音：开</span></button></header>
  <section class="intro"><p>找个角度，让这一枪多飞一会。</p></section>
  <section class="game-layout" id="gameLayout">
   <div class="play-column">
    <div class="arena-wrap"><div class="arena-top"><span id="levelName"></span><div class="arena-stats"><span id="counter"></span><span id="scoreHud">得分 0</span></div></div><canvas id="game" width="600" height="900" aria-label="弹射游戏，拖动瞄准，松手开枪，底部开放"></canvas><div id="result" class="result" hidden><span id="resultTag"></span><h2 id="resultTitle"></h2><div id="resultScore" class="result-score"></div><p id="resultBreakdown"></p><p id="resultDesc"></p><button id="resultAction"></button></div><div class="arena-bottom"><span id="stateText">拖动瞄准 · 松手开枪</span><span id="combo">一颗子弹</span></div></div>
    <section class="ammo-panel" aria-label="选择子弹"><div id="ammoChoices" class="ammo-choices"></div><p id="ammoSummary"></p></section>
-   <div class="play-actions"><button id="retry"><img class="icon" src="assets/icons/arrow-clockwise.svg" alt="">重试</button><button id="openLevels" aria-expanded="false" aria-controls="levelPanel"><img class="icon" src="assets/icons/grid.svg" alt="">关卡</button></div>
+   <div class="play-actions"><button id="retry" aria-label="重试整关" title="重试整关"><img class="icon" src="assets/icons/arrow-clockwise.svg" alt=""><span>重试</span></button><button id="openLevels" aria-expanded="false" aria-controls="levelPanel" aria-label="关卡与设置" title="关卡与设置"><img class="icon" src="assets/icons/grid.svg" alt=""><span>关卡</span></button></div>
    <button id="viewTrajectory" class="secondary trajectory-button" disabled>查看上一枪轨迹</button>
   </div>
   <aside aria-label="关卡与游戏设置"><button id="closeLevels" aria-label="关闭关卡与设置">返回游戏</button>
-   <details id="audioPanel"><summary>音乐与音效</summary><p id="audioStatus" role="status">点击开启声音</p><div class="audio-toggles"><button id="musicToggle" aria-pressed="false">音乐：关</button><button id="sfxToggle" aria-pressed="false">音效：关</button></div><label class="audio-volume" for="audioVolume">音量<input id="audioVolume" type="range" min="0" max="100" value="55" aria-label="游戏总音量"></label></details>
+   <details id="audioPanel"><summary>音乐与音效</summary><p id="audioStatus" role="status">默认开启 · 点击进入后播放</p><div class="audio-toggles"><button id="musicToggle" aria-pressed="true">音乐：开</button><button id="sfxToggle" aria-pressed="true">音效：开</button></div><label class="audio-volume" for="audioVolume">音量<input id="audioVolume" type="range" min="0" max="100" value="55" aria-label="游戏总音量"></label></details>
    <details id="levelPanel"><summary>选择关卡</summary><nav id="levels" aria-label="教学、正式与测试关卡"></nav></details>
    <details id="helpPanel"><summary>本关提示与元素</summary>
    <p id="lessonGoal" class="lesson-goal"></p>
@@ -29,8 +29,9 @@ body.loading main{visibility:hidden;pointer-events:none}#loadingScreen{position:
     <div data-kind="shield"><i class="dot shield"></i><span>盾牌怪</span><small>从背后打，或用爆炸</small></div>
     <div data-kind="barrel"><i class="dot barrel"></i><span>炸药桶</span><small>触碰就爆，范围更大</small></div>
     <div data-kind="obstacle"><i class="dot obstacle"></i><span>普通障碍</span><small>普通两击；穿甲或爆炸一击</small></div>
-    <div data-kind="brick"><i class="dot brick"></i><span>砖墙</span><small>只能用爆炸破坏</small></div>
-    <div data-kind="iron"><i class="dot iron"></i><span>铁墙</span><small>无法破坏，始终反弹</small></div>
+    <div data-kind="brick"><i class="dot brick"></i><span>石墙</span><small>浅色石材，只能用爆炸破坏</small></div>
+    <div data-kind="iron"><i class="dot iron"></i><span>加固石墙</span><small>深色石材与铁箍，无法破坏</small></div>
+    <div data-kind="rotor"><i class="dot rotor"></i><span>转向机关</span><small>先反弹，再转90°；角度保留</small></div>
    </div>
    <p id="ammoHint"></p>
    <label class="speed">关卡速度（固定） <select id="speed" disabled><option value="800" selected>标准 · 800</option></select></label>
@@ -39,4 +40,4 @@ body.loading main{visibility:hidden;pointer-events:none}#loadingScreen{position:
    <details id="statsPanel"><summary>本关成绩</summary><section id="comparison" class="comparison"><table><thead><tr><th>记录</th><th>最近击倒</th><th>最佳击倒</th><th>最高分</th><th>次数</th></tr></thead><tbody id="comparisonRows"></tbody></table><p>每关独立记录；刷新清空。下一枪保留场景。</p></section></details>
   </aside>
  </section><footer>无体力 · 无倒计时 · 随时重来</footer>
-</main><script src="soundtrack.js"></script><script src="game.js"></script><script src="audio.js"></script></body></html>
+</main><script src="soundtrack.js"></script><script src="player-bootstrap.js"></script><script src="garden-frame.js"></script><script src="game.js"></script><script src="audio.js"></script></body></html>

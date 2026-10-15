@@ -67,6 +67,7 @@ console.log('PASS: base score, escalating combo bonus, timeout reset, overlap/de
 
 // Geometry used by the actual sprite is the same one used by projectile contact.
 function shieldRoom(ammo='normal'){const bullet=targetRoom(ammo),target=enemy(origin.x,origin.y-140,'shield');demo.state.enemies.push(target);return{bullet,target,face:demo.shieldGeometry(target)};}
+{const {target,face}=shieldRoom();assert.equal(face.x,target.x);assert.ok(Math.abs(face.y-target.y-8.05)<1e-9);assert.equal(face.r,24);const before=JSON.stringify(target);for(let i=0;i<320;i++)demo.shieldPeekPose(target,i*.025);assert.equal(JSON.stringify(target),before,'Peeking is visual only');assert.equal(demo.shieldPeekPose({...target,alive:false},2).x,0);}
 for(const side of [-1,1]){const room=shieldRoom();room.bullet.x=room.face.x+side*(room.face.r+room.bullet.r+1);room.bullet.y=room.face.y;room.bullet.vx=-side*800;room.bullet.vy=0;demo.step(.004);assert.equal(room.target.alive,true);assert.ok(room.bullet.vx*side>0,'Visible left and right shield edges reflect');assert.equal(demo.state.score,0);}
 for(const inside of [false,true]){const room=shieldRoom();room.bullet.x=room.face.x+room.face.r+room.bullet.r+(inside?-.2:.2);room.bullet.y=room.face.y+5;room.bullet.vx=0;room.bullet.vy=-800;demo.step(.016);assert.equal(room.target.alive,true);assert.equal(demo.state.bounces,inside?1:0,'Only contact inside the drawn disk (plus bullet radius) blocks');}
 {const room=shieldRoom();room.bullet.x=room.target.x;room.bullet.y=room.target.y-room.target.r-room.bullet.r-1;room.bullet.vx=0;room.bullet.vy=800;demo.step(.008);assert.equal(room.target.alive,false,'Rear approach reaches the exposed body before the shield');assert.equal(demo.state.bounces,0);}
@@ -97,3 +98,5 @@ for(const source of ['bomb','barrel']){b=targetRoom();const y=origin.y-100;demo.
 demo.load(CH);assert.deepEqual(Array.from(demo.state.walls,w=>w.type),['obstacle','brick','iron']);const intact=JSON.stringify(demo.state.walls);demo.state.walls[0].hp=0;demo.state.walls[0].alive=false;get('retry').onclick();assert.equal(JSON.stringify(demo.state.walls),intact,'Retry restores all terrain');
 console.log('PASS: two-hit obstacle, first-hit reflection and final-hit passage, contact deduplication, independent pellets, bullet-proof brick/iron, explosive impact, bomb/barrel terrain blast, nearest rectangle range, iron immunity, no terrain score and retry restoration');
 require('./campaign-check.cjs');
+require('./rotor-check.cjs');
+require('./early-campaign-check.cjs');
