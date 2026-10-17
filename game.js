@@ -7,8 +7,9 @@
  const now=()=>typeof performance!=='undefined'?performance.now():Date.now();
  // Art changes presentation only; all collisions remain in the original flat room.
  const art={};
- const artFiles={courtyard:'toy-courtyard-lawn-v1',gardenDecor:'toy-garden-decor-v1',player:'toy-player-poses',monster:'toy-bomb-satin-v1',normalMonster:'toy-normal-sculpt-v2',helmet:'toy-windup-cover-v1',helmetMonster:'toy-windup-armored-v1',helmetBare:'toy-windup-bare-v1',shield:'toy-shield-peek-v1',barrel:'toy-barrel',obstacle:'toy-wood-satin-v2',woodDamaged:'toy-wood-damaged-satin-v2',brick:'toy-limestone-v1',iron:'toy-basalt-v1'};
+ const artFiles={courtyard:'toy-courtyard-lawn-v1',gardenDecor:'toy-garden-decor-v1',gardenSky:'garden-sky-v1',gardenGround:'garden-ground-whole-v1',player:'toy-player-poses',monster:'toy-bomb-satin-v1',normalMonster:'toy-normal-sculpt-v2',helmet:'toy-windup-cover-v1',helmetMonster:'toy-windup-armored-v1',helmetBare:'toy-windup-bare-v1',shield:'toy-shield-peek-v1',barrel:'toy-barrel',obstacle:'toy-wood-satin-v2',woodDamaged:'toy-wood-damaged-satin-v2',brick:'toy-limestone-v1',iron:'toy-basalt-v1'};
  let assetsReady=typeof Image==='undefined',allAssetsReady=assetsReady,initialReadyAt=assetsReady?now():0,gameEntered=assetsReady;
+ let sceneImagesReady=assetsReady,sceneReady=assetsReady;
  let ensureLevelAssets=()=>Promise.resolve(true),showLevelLoading=()=>{};
  if(!assetsReady)for(const key of Object.keys(artFiles))art[key]=new Image();
  // Gate on first-level art and visible UI; defer art used only by later levels.
@@ -16,7 +17,7 @@
   if(assetsReady)return;
   const jobs=[...Object.entries(artFiles).map(([key,file])=>({key,img:art[key],file,done:false})),{key:'toy-normal-current',img:$('currentAmmoIcon'),file:'toy-normal',done:false},...Array.from(document.querySelectorAll('img[data-asset]'),img=>({key:img.dataset.asset,img,file:img.dataset.asset,done:false}))];
   const byKey=new Map(jobs.map(job=>[job.key,job]));
-  const firstLevelKeys=['courtyard','gardenDecor','player','normalMonster','toy-title','toy-normal-current','toy-fast','toy-explosive','toy-scatter'];
+  const firstLevelKeys=['courtyard','gardenDecor','gardenSky','gardenGround','player','normalMonster','toy-title','toy-normal-current','toy-fast','toy-explosive','toy-scatter'];
   const progress=$('loadingProgress'),status=$('loadingStatus'),retry=$('loadingRetry'),main=document.querySelector('main');
   let running=false,backgroundPromise=null,pendingLevel=null,loadRequest=0;
   const report=(queue,label='首关画面')=>{const done=queue.filter(job=>job.done).length;progress.max=queue.length;progress.value=done;status.textContent=`${label} ${done} / ${queue.length} · ${Math.round(done/queue.length*100)}%`;};
@@ -38,11 +39,13 @@
    }));return results.every(Boolean);
   }
   const requiredKeys=index=>{
-   const level=levels[index],keys=new Set(['courtyard','gardenDecor','player','normalMonster','toy-title','toy-normal-current']);
+   const level=levels[index],keys=new Set(['courtyard','gardenDecor','gardenSky','gardenGround','player','normalMonster','toy-title','toy-normal-current']);
    for(const enemy of level.enemies){const type=enemy[2]||'normal';if(type==='bomb')keys.add('monster');if(type==='shield')keys.add('shield');if(type==='helmet'){keys.add('helmetMonster');keys.add('helmetBare');keys.add('helmet');}}
    for(const wall of level.walls){const type=wall.type||'iron';keys.add(type);if(type==='obstacle')keys.add('woodDamaged');}
    if(level.barrels.length)keys.add('barrel');return [...keys];
   };
+  // The default room can change: its walls and enemies must be ready at entry too.
+  for(const key of requiredKeys(state.index))if(!firstLevelKeys.includes(key))firstLevelKeys.push(key);
   const keysReady=keys=>keys.every(key=>byKey.get(key)?.done);
   ensureLevelAssets=async index=>{const queue=requiredKeys(index).map(key=>byKey.get(key));if(queue.some(job=>!job))return false;return loadJobs(queue,()=>{if(!loadingScreen.hidden)report(queue,'本关画面');});};
   const showPendingLevel=(index,keep,request)=>{pendingLevel={index,keep,request};main.inert=true;loadingScreen.hidden=false;retry.hidden=true;const queue=requiredKeys(index).map(key=>byKey.get(key)).filter(Boolean);report(queue,'本关画面');};
@@ -51,8 +54,11 @@
    if(running)return;running=true;retry.hidden=true;const queue=firstLevelKeys.map(key=>byKey.get(key));report(queue);
    const ok=await loadJobs(queue,()=>report(queue));
    if(!ok){running=false;status.textContent=`首关还有 ${queue.filter(job=>!job.done).length} 个素材未加载成功，请检查网络后重试。`;retry.hidden=false;return;}
-   status.textContent='正在准备持枪小人…';progress.max=1;progress.value=0;
+   sceneImagesReady=true;status.textContent='正在准备持枪小人…';progress.max=1;progress.value=0;
    await window.loadPlayerModel?.();
+   status.textContent='正在准备游戏画面…';
+   try{syncCanvas();draw();if(!sceneReady)throw new Error('Scene is not ready');}
+   catch{running=false;status.textContent='游戏画面准备失败，请重试。';retry.hidden=false;return;}
    assetsReady=true;initialReadyAt=now();running=false;progress.value=1;status.textContent=window.playerModel?.ready?'准备就绪 · 点击进入，音乐随即开启':'准备就绪 · 使用兼容人物画面';$('loadingStart').hidden=false;
   }
   function runBackground(){
@@ -62,7 +68,7 @@
   }
   retry.onclick=()=>{if(!gameEntered){runInitial();return;}if(pendingLevel)load(pendingLevel.index,pendingLevel.keep);};
   $('loadingStart').onclick=()=>{
-   const button=$('loadingStart');if(!assetsReady||button.disabled)return;
+   const button=$('loadingStart');if(!assetsReady||!sceneReady||button.disabled)return;
    button.disabled=true;button.hidden=true;button.textContent='正在准备音乐…';
    const audioReady=Promise.resolve(window.gameAudio?.start()).catch(()=>{});
    gameEntered=true;dragging=false;main.inert=false;document.body.classList.remove('loading');syncCanvas();draw();$('loadingScreen').hidden=true;
@@ -253,61 +259,12 @@
  function line(x1,y1,x2,y2,color,width=1){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
  function circle(x,y,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
  function drawHelmet(x,y,angle=0,alpha=1){if(!ready(art.helmet))return;ctx.save();ctx.globalAlpha=alpha;ctx.translate(x,y);ctx.rotate(angle);const width=34,height=width*807/1151;ctx.drawImage(art.helmet,56,235,1151,807,-width/2,-height,width,height);ctx.restore();}
- // All background pieces use ONE uniform art scale. Larger rooms add pieces,
- // never stretch the source texture, wall bricks, grass or chalk drawings.
+ // Wall strips retain a uniform scale; the ground is one complete scene below them.
  const courtyardStyle={scale:18/96,floor:[320,420,320,320],wallWidth:96,topHeight:112,sideStart:300,sideHeight:480};
  let courtyardCache;
- // Continuous world-space lawn: no repeated bitmap tile or room-sized stretching.
- let lawnSurface,lawnPaints=0;
  function lawnHash(x,y,seed=0){let h=Math.imul(x,374761393)^Math.imul(y,668265263)^Math.imul(seed,1442695041);h=Math.imul(h^(h>>>13),1274126177);return((h^(h>>>16))>>>0)/4294967295;}
- function lawnNoise(x,y,size,seed){
-  const px=x/size,py=y/size,ix=Math.floor(px),iy=Math.floor(py),fx=px-ix,fy=py-iy;
-  const smooth=t=>t*t*t*(t*(t*6-15)+10),u=smooth(fx),v=smooth(fy);
-  const a=lawnHash(ix,iy,seed),b=lawnHash(ix+1,iy,seed),c=lawnHash(ix,iy+1,seed),d=lawnHash(ix+1,iy+1,seed);
-  return(a+(b-a)*u)*(1-v)+(c+(d-c)*u)*v;
- }
- function lawnSample(x,y,roomBounds){
-  const broad=lawnNoise(x,y,210,71)*.65+lawnNoise(x+47,y-31,92,93)*.35;
-  const soft=(lawnNoise(x,y,28,15)-.5)*3,grain=(lawnHash(Math.floor(x),Math.floor(y),23)-.5)*1.3;
-  let shade=1;
-  if(roomBounds){
-   const smooth=t=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t);};
-   const root=d=>Math.max(0,1-Math.abs(d)/42)**2;
-   const run=smooth((y-roomBounds.top+12)/28)*(1-smooth((y-roomBounds.bottom+24)/54));
-   const across=smooth((x-roomBounds.left+18)/28)*(1-smooth((x-roomBounds.right-10)/28));
-   shade-=.09*run*(root(x-roomBounds.left)+root(x-roomBounds.right))+.08*across*root(y-roomBounds.top);
-  }
-  return[(128+broad*36+soft+grain)*shade,(160+broad*46+soft+grain)*shade,(84+broad*32+soft*.6+grain)*shade];
- }
- function paintNaturalLawn(c,area,roomBounds){
-  const step=2,x0=Math.floor(area.x/step)*step-step,y0=Math.floor(area.y/step)*step-step;
-  const width=Math.ceil((area.x+area.width-x0)/step)+2,height=Math.ceil((area.y+area.height-y0)/step)+2;
-  lawnSurface??=document.createElement('canvas');lawnSurface.width=width;lawnSurface.height=height;
-  const lc=lawnSurface.getContext('2d'),pixels=lc.createImageData(width,height),data=pixels.data;
-  for(let row=0;row<height;row++)for(let col=0;col<width;col++){
-   const color=lawnSample(x0+col*step,y0+row*step,roomBounds),i=(row*width+col)*4;
-   data[i]=color[0];data[i+1]=color[1];data[i+2]=color[2];data[i+3]=255;
-  }
-  lc.putImageData(pixels,0,0);c.save();c.beginPath();c.rect(area.x,area.y,area.width,area.height);c.clip();
-  c.drawImage(lawnSurface,x0,y0,width*step,height*step);
-  // Irregular short-grass clusters, not uniform stipple or tiled carpet grain.
-  const spacing=5.5;
-  for(let row=Math.floor(area.y/spacing)-1;row<Math.ceil((area.y+area.height)/spacing)+1;row++)for(let col=Math.floor(area.x/spacing)-1;col<Math.ceil((area.x+area.width)/spacing)+1;col++){
-   const x=col*spacing+lawnHash(col,row,31)*spacing,y=row*spacing+lawnHash(col,row,37)*spacing;
-   const distance=Math.min(Math.abs(x-roomBounds.left),Math.abs(x-roomBounds.right),Math.abs(y-roomBounds.top));
-   const root=Math.max(0,1-distance/28),chance=.12+lawnNoise(x,y,47,69)**1.7*.75+root*.24;
-   if(lawnHash(col,row,41)>chance)continue;
-   const count=2+Math.floor(lawnHash(col,row,43)*3),baseHeight=1.6+lawnHash(col,row,47)*1.7+root*1.5;
-   for(let blade=0;blade<count;blade++){
-    const jitter=lawnHash(col,row,53+blade),dx=(blade-(count-1)/2)*.75,h=baseHeight*(.65+jitter*.65),lean=(jitter-.5)*2.8;
-    const half=.35+jitter*.2;c.fillStyle=blade%2?'#d5e8a954':'#4e792c4b';
-    c.beginPath();c.moveTo(x+dx-half,y);c.quadraticCurveTo(x+dx-half+lean*.2,y-h*.65,x+dx+lean,y-h);
-    c.quadraticCurveTo(x+dx+half+lean*.3,y-h*.35,x+dx+half,y);c.closePath();c.fill();
-   }
-  }
-  c.restore();lawnPaints++;
- }
- window.lawnGround=Object.freeze({paint:paintNaturalLawn,sample:lawnSample,get diagnostics(){return{paints:lawnPaints,step:2,space:'world',version:1};}});
+ // One full scene is drawn behind this transparent gameplay canvas.
+ window.lawnGround=Object.freeze({sample:(x,y)=>window.gardenFrame?.sample(x,y)||[145,190,65],get diagnostics(){return{paints:window.gardenFrame?.diagnostics.draws||0,space:'world',version:5,material:'garden-ground-whole-v1',tiled:false,ready:ready(art.gardenGround)};}});
  // Fixed, sparse ground dressing. Never inserted into the collision/state arrays.
  function courtyardDetails(index,width=W,height=H){
   const level=levels[index],items=[];let seed=(index+1)*7919+width*31+height;
@@ -373,17 +330,18 @@
   }
  }
  function repeatArt(c,img,source,area,axis,mirror=false){const [sx,sy,sw,sh]=source,[x,y,w,h]=area,k=courtyardStyle.scale,tw=sw*k,th=sh*k;c.save();c.beginPath();c.rect(x,y,w,h);c.clip();const columns=axis==='y'?1:Math.ceil(w/tw),rows=axis==='x'?1:Math.ceil(h/th);for(let row=0;row<rows;row++)for(let col=0;col<columns;col++){c.save();c.translate(x+col*tw+tw/2,y+row*th+th/2);if(mirror)c.scale(col%2?-1:1,row%2?-1:1);c.drawImage(img,sx,sy,sw,sh,-tw/2,-th/2,tw,th);c.restore();}c.restore();}
- function drawCourtyard(){ctx.fillStyle='#a4bf75';ctx.fillRect(0,0,W,H);if(!ready(art.courtyard))return;const key=`${state.index}/${W}/${H}/${canvas.width}/${canvas.height}`;if(courtyardCache?.key!==key){const surface=document.createElement('canvas');surface.width=canvas.width;surface.height=canvas.height;const c=surface.getContext('2d'),img=art.courtyard,s=courtyardStyle,k=s.scale,right=img.naturalWidth-s.wallWidth,topY=bounds.top-s.topHeight*k;
-   c.setTransform(surface.width/W,0,0,surface.height/H,0,0);c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';paintNaturalLawn(c,{x:0,y:0,width:W,height:H},bounds);
-   // Keep only the stone strip: baked lawn strips have a hard edge when repeated.
+ function drawCourtyard(){if(!ready(art.courtyard))return;const framed=!!window.gardenFrame;const key=`${state.index}/${W}/${H}/${canvas.width}/${canvas.height}/${framed}`;if(courtyardCache?.key!==key){const surface=document.createElement('canvas');surface.width=canvas.width;surface.height=canvas.height;const c=surface.getContext('2d'),img=art.courtyard,s=courtyardStyle,k=s.scale,right=img.naturalWidth-s.wallWidth,topY=bounds.top-s.topHeight*k;
+   c.setTransform(surface.width/W,0,0,surface.height/H,0,0);c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
+   // The outer frame owns the visible wall. Retain these strips only as fallback.
+   if(!framed){
    const shadowWidth=0,shadow=shadowWidth*k;
    repeatArt(c,img,[0,s.sideStart,s.wallWidth+shadowWidth,s.sideHeight],[0,bounds.top,bounds.left+shadow,H-bounds.top],'y');
    repeatArt(c,img,[right-shadowWidth,s.sideStart,s.wallWidth+shadowWidth,s.sideHeight],[bounds.right-shadow,bounds.top,W-bounds.right+shadow,H-bounds.top],'y');
    repeatArt(c,img,[s.wallWidth,0,img.naturalWidth-s.wallWidth*2,s.topHeight],[bounds.left,topY,bounds.right-bounds.left,s.topHeight*k],'x');
+   c.drawImage(img,0,0,s.wallWidth,s.topHeight,0,topY,s.wallWidth*k,s.topHeight*k);c.drawImage(img,right,0,s.wallWidth,s.topHeight,bounds.right,topY,s.wallWidth*k,s.topHeight*k);
+   }
    // One continuous inward shadow avoids dark vertical seams at tile ends.
    const wallShadow=c.createLinearGradient(0,bounds.top,0,bounds.top+14);wallShadow.addColorStop(0,'#78512c35');wallShadow.addColorStop(1,'#78512c00');c.fillStyle=wallShadow;c.fillRect(bounds.left,bounds.top,bounds.right-bounds.left,14);
-   // Corners and the two entry ends keep their size. No wall across the bottom.
-   c.drawImage(img,0,0,s.wallWidth,s.topHeight,0,topY,s.wallWidth*k,s.topHeight*k);c.drawImage(img,right,0,s.wallWidth,s.topHeight,bounds.right,topY,s.wallWidth*k,s.topHeight*k);
    const details=courtyardDetails(state.index);paintCourtyardDetails(c,details);courtyardCache={key,surface,details};
   }ctx.drawImage(courtyardCache.surface,0,0,W,H);}
  // One fixed upper-left warm key. Presentation only, never collider geometry.
@@ -546,7 +504,7 @@
  }
  function toyFragments(x,y){if(reducedMotion())return;const colors=['#ffe19b','#ad8bdb','#e9a885','#a7ced4'];for(let i=0;i<8&&state.particles.length<160;i++){const a=i*Math.PI/4;state.particles.push({x,y,vx:Math.cos(a)*(65+i%3*25),vy:Math.sin(a)*80-35,life:.45,max:.45,color:colors[i%4],toy:true,angle:a,spin:(i%2?1:-1)*7,width:3+i%3,height:2});}}
  function drawBlast(r){const t=1-r.life/.38;ctx.save();if(reducedMotion()){ctx.globalAlpha=.15*(1-t);circle(r.x,r.y,r.max,'#ffd290');ctx.restore();return;}if(t<.32){ctx.globalAlpha=(1-t/.32)*.85;circle(r.x,r.y,8+t*55,'#fff5cf');}for(let i=0;i<6;i++){const a=i*Math.PI/3,spread=r.max*.38*t;ctx.globalAlpha=.3*(1-t);circle(r.x+Math.cos(a)*spread,r.y+Math.sin(a)*spread,8+15*t,'#e4c8ab');}ctx.restore();}
- function draw(){window.gardenFrame?.render({canvas,W,H,bounds,courtyard:art.courtyard,decor:art.gardenDecor});ctx.setTransform(canvas.width/W,0,0,canvas.height/H,0,0);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.clearRect(0,0,W,H);ctx.save();if(screenShake&&!reducedMotion())ctx.translate((Math.random()-.5)*screenShake,(Math.random()-.5)*screenShake);drawCourtyard();line(bounds.left,bounds.bottom,bounds.left,bounds.top,'#655a46',1);line(bounds.left,bounds.top,bounds.right,bounds.top,'#655a46',1);line(bounds.right,bounds.top,bounds.right,bounds.bottom,'#655a46',1);
+ function draw(){sceneReady=!window.gardenFrame||sceneImagesReady&&window.gardenFrame.render({canvas,W,H,bounds,courtyard:art.courtyard,decor:art.gardenDecor,sky:art.gardenSky,ground:art.gardenGround});window.gardenFrame?.animateAmbience({active:gameEntered&&sceneReady&&$('loadingScreen').hidden&&!$('levelPanel').open&&$('settingsDialog').hidden&&$('result').hidden,reduced:reducedMotion()});ctx.setTransform(canvas.width/W,0,0,canvas.height/H,0,0);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.clearRect(0,0,W,H);ctx.save();if(screenShake&&!reducedMotion())ctx.translate((Math.random()-.5)*screenShake,(Math.random()-.5)*screenShake);drawCourtyard();if(!window.gardenFrame){line(bounds.left,bounds.bottom,bounds.left,bounds.top,'#655a46',1);line(bounds.left,bounds.top,bounds.right,bounds.top,'#655a46',1);line(bounds.right,bounds.top,bounds.right,bounds.bottom,'#655a46',1);}
   if(state.phase==='aim'&&showPrevious&&previous.length){ctx.save();ctx.globalAlpha=.17;ctx.beginPath();for(const s of previous){ctx.moveTo(s.x1,s.y1);ctx.lineTo(s.x2,s.y2);}ctx.strokeStyle=ammoTypes[selectedAmmo].color;ctx.lineWidth=1;ctx.stroke();ctx.restore();}
   // Sort a temporary render list, never the logical arrays / collision order.
   const solids=[...state.walls.filter(w=>w.alive!==false).map(w=>({depth:w.y+w.h,paint:()=>drawTerrain(w)})),...state.rotors.map(g=>({depth:g.y+Math.abs(Math.sin(g.angle))*g.length/2+g.thickness/2,paint:()=>drawRotor(g)})),...state.barrels.filter(b=>b.alive).map(b=>({depth:b.y+b.r,paint:()=>drawBarrel(b)})),...state.enemies.map(e=>({depth:e.type==='shield'?shieldGeometry(e).y+shieldGeometry(e).r:e.y+e.r,paint:()=>drawEnemy(e)}))];
@@ -560,7 +518,12 @@
   for(const p of state.particles){ctx.globalAlpha=Math.min(1,p.life/.25);if(p.wood||p.toy){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.angle);ctx.fillStyle=p.color;ctx.fillRect(-p.width/2,-p.height/2,p.width,p.height);ctx.restore();}else circle(p.x,p.y,2.5,p.color);}ctx.globalAlpha=1;ctx.font='bold 13px "Microsoft YaHei",sans-serif';ctx.textAlign='center';for(const l of state.labels){ctx.globalAlpha=Math.min(1,l.life*3);ctx.fillStyle='#553779';ctx.fillText(l.text,l.x,l.y);}ctx.globalAlpha=1;ctx.restore();}
  function drawAim(){const dx=aim.x,dy=aim.y;let t=Infinity,axis='y';if(dx>0)t=(bounds.right-4-origin.x)/dx;if(dx<0)t=(bounds.left+4-origin.x)/dx;const ty=(bounds.top+4-origin.y)/dy;if(ty<t){t=ty;axis='y';}else axis='x';let hitWall=false;for(const w of state.walls){if(w.alive===false||(ammoTypes[selectedAmmo].armorPiercing&&w.type==='obstacle'))continue;if(dx===0&&(origin.x<w.x-4||origin.x>w.x+w.w+4))continue;const tx1=dx===0?-Infinity:(w.x-4-origin.x)/dx,tx2=dx===0?Infinity:(w.x+w.w+4-origin.x)/dx,ty1=(w.y-4-origin.y)/dy,ty2=(w.y+w.h+4-origin.y)/dy;const nearX=Math.min(tx1,tx2),farX=Math.max(tx1,tx2),nearY=Math.min(ty1,ty2),farY=Math.max(ty1,ty2),near=Math.max(nearX,nearY);if(near>0&&near<Math.min(farX,farY)&&near<t){t=near;axis=nearX>nearY?'x':'y';hitWall=true;}}
   let reflectedX=axis==='x'?-dx:dx,reflectedY=axis==='y'?-dy:dy;for(const g of state.rotors){const hit=rotorRay(g,origin.x,origin.y,dx,dy);if(hit&&hit.t<t){t=hit.t;const dot=dx*hit.nx+dy*hit.ny;reflectedX=dx-2*dot*hit.nx;reflectedY=dy-2*dot*hit.ny;}}
-  const x=origin.x+dx*t,y=origin.y+dy*t;ctx.save();ctx.setLineDash([5,7]);line(origin.x,origin.y,x,y,'#72608790',1.5);line(x,y,x+reflectedX*85,y+reflectedY*85,'#72608760',1.5);ctx.setLineDash([]);circle(x,y,3,'#826799');ctx.restore();}
+  const x=origin.x+dx*t,y=origin.y+dy*t,fit=Math.max(.01,(canvas.getBoundingClientRect().width||W)/W),px=1/fit;
+  ctx.save();ctx.lineCap='round';ctx.lineJoin='round';ctx.setLineDash([7*px,5*px]);
+  // Keep guide thickness readable in CSS pixels, including small/tall rooms.
+  const guide=(x1,y1,x2,y2,alpha)=>{ctx.globalAlpha=alpha;line(x1,y1,x2,y2,'#263449e6',4.4*px);line(x1,y1,x2,y2,'#fffdf2',2.2*px);};
+  guide(origin.x,origin.y,x,y,1);guide(x,y,x+reflectedX*85,y+reflectedY*85,.85);
+  ctx.globalAlpha=1;ctx.setLineDash([]);circle(x,y,5*px,'#263449');circle(x,y,3.5*px,'#fffdf2');circle(x,y,1.5*px,'#a47ad4');ctx.restore();}
  function point(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
  function setAim(e){const p=point(e),dx=p.x-origin.x,dy=Math.min(-30,p.y-origin.y),len=Math.hypot(dx,dy);aim={x:dx/len,y:dy/len};}
  canvas.addEventListener('pointerdown',e=>{if(!gameEntered||state.phase!=='aim')return;dragging=true;canvas.setPointerCapture(e.pointerId);setAim(e);});canvas.addEventListener('pointermove',e=>{if(dragging)setAim(e);});canvas.addEventListener('pointerup',e=>{if(!dragging)return;setAim(e);dragging=false;shoot();});canvas.addEventListener('pointercancel',()=>dragging=false);
@@ -578,7 +541,7 @@
  load(Math.max(0,levels.findIndex(l=>l.group==='formal')));let lastShotCount=stats.shots;function frame(time){let dt=Math.min(.032,(time-lastTime)/1000||.016);lastTime=time;if(lastShotCount!==stats.shots){lastShotCount=stats.shots;recoilUntil=state.time+.12;}if(slow>0){slow-=dt;dt*=.35;}update(dt);draw();requestAnimationFrame(frame);}requestAnimationFrame(frame);
  prepareAssets();
  // Small diagnostic surface for repeatable shot and physics verification.
- window.demo={get gameEntered(){return gameEntered;},get assetsReady(){return assetsReady;},get allAssetsReady(){return allAssetsReady;},get initialReadyMs(){return initialReadyAt;},get playerMode(){return window.playerModel?.ready?'3d':'sprite';},get state(){return state;},get stage(){return {W,H,origin,bounds};},get playerRig(){return playerRig();},assetReady(key){return !!art[key]&&ready(art[key]);},courtyardDetails,get courtyardDecor(){return courtyardCache?.details.map(item=>({...item}))||[];},enemyIdlePose,shieldPeekPose,shadowGeometry,terrainVolume,shieldGeometry,rotorContact,rotorRay,rotorRules,comparison,levels,ammoTypes,scoreRules,starsForScore,selectAmmo,load,shootAt(x,y){if(state.phase!=='aim')return;const dx=x-origin.x,dy=Math.min(-30,y-origin.y),length=Math.hypot(dx,dy);aim={x:dx/length,y:dy/length};shoot();},step:update,render:draw,stats};
+ window.demo={get gameEntered(){return gameEntered;},get assetsReady(){return assetsReady;},get sceneReady(){return sceneReady;},get allAssetsReady(){return allAssetsReady;},get initialReadyMs(){return initialReadyAt;},get playerMode(){return window.playerModel?.ready?'3d':'sprite';},get state(){return state;},get stage(){return {W,H,origin,bounds};},get playerRig(){return playerRig();},assetReady(key){return !!art[key]&&ready(art[key]);},courtyardDetails,get courtyardDecor(){return courtyardCache?.details.map(item=>({...item}))||[];},enemyIdlePose,shieldPeekPose,shadowGeometry,terrainVolume,shieldGeometry,rotorContact,rotorRay,rotorRules,comparison,levels,ammoTypes,scoreRules,starsForScore,selectAmmo,load,shootAt(x,y){if(state.phase!=='aim')return;const dx=x-origin.x,dy=Math.min(-30,y-origin.y),length=Math.hypot(dx,dy);aim={x:dx/length,y:dy/length};shoot();},step:update,render:draw,stats};
  window.demo.enemyGrounding=enemyGrounding;
 })();
 

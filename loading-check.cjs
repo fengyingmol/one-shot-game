@@ -19,22 +19,26 @@ async function main(){
   await run('demo.shootAt(240,100)');assert.equal(await run('demo.state.shotsUsed'),0);await screenshot('demo-loading-mobile.png');
   await wait('demo.assetsReady');const firstReadyMs=await run('demo.initialReadyMs');assert.ok(firstReadyMs<30000,`cold first entry took ${Math.round(firstReadyMs)}ms (limit 30000ms)`);
   assert.equal(await run('loadingProgress.max===1&&loadingProgress.value===1&&!loadingStart.hidden&&!demo.gameEntered'),true);
+  assert.ok(await run('demo.sceneReady&&gardenFrame.diagnostics.scenes.sky&&gardenFrame.diagnostics.scenes.ground'),'Complete scene must be rendered before the entry button is ready');
   assert.equal(await run('demo.allAssetsReady'),false);await run('demo.shootAt(240,100)');assert.equal(await run('demo.state.shotsUsed'),0);
   const entryMs=await enter();assert.ok(entryMs<500,`click-to-play took ${Math.round(entryMs)}ms`);const firstMode=await run('demo.playerMode');
   assert.equal(await run('document.querySelector("main").inert'),false);assert.equal(await run('demo.playerMode'),firstMode);
-  assert.ok(await run('demo.assetReady("courtyard")&&demo.assetReady("gardenDecor")&&demo.assetReady("player")&&demo.assetReady("normalMonster")'));
+  assert.ok(await run('demo.assetReady("courtyard")&&demo.assetReady("gardenDecor")&&demo.assetReady("gardenSky")&&demo.assetReady("gardenGround")&&demo.assetReady("player")&&demo.assetReady("normalMonster")'));
   assert.ok(await run('document.documentElement.scrollWidth<=innerWidth&&document.querySelector("#loadingRetry").getBoundingClientRect().bottom<=innerHeight'));
   await screenshot('demo-loading-complete.png');console.log(`PASS: cold 390px mobile entry in ${Math.round(firstReadyMs)}ms at 200KB/s; game starts in ${Math.round(entryMs)}ms; player appearance stays stable`);
 
   await send('Network.emulateNetworkConditions',{offline:false,latency:0,downloadThroughput:-1,uploadThroughput:-1});
   await send('Emulation.setDeviceMetricsOverride',{width:320,height:568,deviceScaleFactor:2,mobile:true});
-  blockPattern='*toy-normal-sculpt-v2*';await send('Fetch.enable',{patterns:[{urlPattern:blockPattern,requestStage:'Request'}]});
+  for(const asset of ['toy-normal-sculpt-v2','garden-sky-v1','garden-ground-whole-v1']){
+  blockPattern='*'+asset+'*';await send('Fetch.enable',{patterns:[{urlPattern:blockPattern,requestStage:'Request'}]});
   await send('Page.navigate',{url:process.argv[2]||'http://127.0.0.1:4180/'});await wait('window.demo&&!loadingRetry.hidden');
   assert.equal(await run('demo.assetsReady'),false);assert.ok(await run('document.querySelector("main").inert'));
   await screenshot('demo-loading-failed.png');blockPattern='';await click('#loadingRetry');await wait('demo.assetsReady');await enter();
   assert.ok(await run('loadingScreen.hidden&&!document.querySelector("main").inert&&document.documentElement.scrollWidth<=innerWidth'));
   await run('demo.load(0);demo.shootAt(300,380)');assert.equal(await run('demo.state.shotsUsed'),1);assert.equal(errors.length,0);
-  console.log('PASS: critical WebP/PNG failure stays gated, retry restores 320px play and shooting');
+  assert.equal(await run('demo.sceneReady'),true);
+  console.log('PASS: '+asset+' WebP/PNG failure stays gated, retry restores 320px complete scene and shooting');
+  }
 
   await send('Network.setCacheDisabled',{cacheDisabled:true});blockPattern='*toy-shield-peek-v1*';blocked=0;
   await send('Fetch.enable',{patterns:[{urlPattern:blockPattern,requestStage:'Request'}]});
