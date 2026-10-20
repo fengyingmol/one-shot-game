@@ -334,3 +334,25 @@ button:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visi
 .ammo-picker .ammo-button:disabled{opacity:.45;box-shadow:none}
 @keyframes ammo-sheet-in{from{opacity:0;transform:translate(-50%,22px)}to{opacity:1;transform:translate(-50%,0)}}
 @media(prefers-reduced-motion:reduce){.ammo-picker{animation:none}}
+/* Same skins and dimensions; PNG declarations above remain the old-browser fallback. */
+.arena-top #levelName,.arena-stats{border-image-source:image-set(url('assets/ui/cream-v1/pill.webp') type('image/webp'),url('assets/ui/cream-v1/pill.png') type('image/png'))}
+#retry,#openSettings,#openLevels,.trajectory-button,.loading-mark{background-image:image-set(url('assets/ui/cream-v1/control.webp') type('image/webp'),url('assets/ui/cream-v1/control.png') type('image/png'))}
+.ammo-button.active,.ammo-current{background-image:image-set(url('assets/ui/cream-v1/ammo.webp') type('image/webp'),url('assets/ui/cream-v1/ammo.png') type('image/png'))}
+/* Soften scenery highlights and deep greens, keeping the gameplay layer crisp. */
+#gardenFrame{filter:saturate(.88) contrast(.88) brightness(.98)}
+#gardenLeaves{filter:saturate(.9) contrast(.94) brightness(.98)}
+.arena-top #levelName,.arena-stats,#retry,#openSettings,#openLevels,.trajectory-button,.ammo-current{filter:saturate(.8) contrast(.96) brightness(.98)}
+/* Teaching layer follows the contained board, never changes layout or captures input. */
+#gameGuide{position:fixed;inset:0;z-index:4;pointer-events:none;overflow:hidden}
+#gameGuide[hidden]{display:none}
+#gameGuide .guide-scene{position:absolute;overflow:hidden}
+.guide-path,.guide-path-under{stroke-linecap:round;stroke-linejoin:round}
+.guide-card{position:absolute;box-sizing:border-box;padding:12px 14px;background:#fff9eaf5;border:1px solid #e8c991;border-radius:18px;box-shadow:0 3px 0 #b7945540,0 8px 20px #2235241a;color:#714626;text-align:left}
+.guide-card .guide-kicker{display:block;font-size:10px;font-weight:800;letter-spacing:1px;color:#9b733c;margin-bottom:4px}
+.guide-card .guide-title{display:block;font-size:16px;line-height:1.4}
+.guide-card .guide-copy{font-size:13px;line-height:1.65;margin:6px 0;color:#674c30}
+.guide-card>span{display:block;font-size:10px;line-height:1.5;color:#927957;border-top:1px solid #e8d9bd;padding-top:6px}
+.guide-settings{border-top:1px solid #e8d9bd;margin-top:20px;padding-top:12px}
+.guide-settings p{font-size:12px;color:#96784f}
+#replayGuide{padding:10px 14px;background:#fff2d6;border:1px solid #e0bf83}
+@media(max-height:650px){.guide-card{padding:10px 12px}.guide-card .guide-title{font-size:16px}.guide-card .guide-copy{font-size:13px;margin:4px 0}}

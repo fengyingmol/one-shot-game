@@ -52,7 +52,21 @@ async function main(){
   assert.equal(await run('demo.assetReady("shield")'),true);await screenshot('demo-level-art-ready.png');assert.equal(errors.length,0);
   console.log('PASS: an unready later-level sprite keeps the old scene visible, retries, then switches with artwork ready');
 
-  blockPattern='*three.core.js*';await send('Fetch.enable',{patterns:[{urlPattern:blockPattern,requestStage:'Request'}]});
+  // Deferred ammo icons must be gated just like later enemy artwork.
+  blockPattern='*toy-fast.*';blocked=0;await send('Fetch.enable',{patterns:[{urlPattern:'*toy-fast.*',requestStage:'Request'}]});
+  // Match the extension-independent stem in the request handler too.
+  blockPattern='*toy-fast*';
+  await send('Page.navigate',{url:process.argv[2]||'http://127.0.0.1:4180/'});await wait('window.demo?.assetsReady');await enter();
+  await wait('demo.gameEntered');
+  const iconDeadline=Date.now()+30000;while(blocked<3&&Date.now()<iconDeadline)await new Promise(r=>setTimeout(r,100));assert.ok(blocked>=3);
+  const fastLevel=await run('demo.levels.findIndex(l=>l.ammo.fast>0)');assert.ok(fastLevel>=0);
+  await run(`void demo.load(${fastLevel})`);await wait('!loadingRetry.hidden');
+  assert.ok(await run(`!loadingScreen.hidden&&document.querySelector('main').inert&&demo.state.index!==${fastLevel}`));
+  blockPattern='';await click('#loadingRetry');await wait(`demo.state.index===${fastLevel}&&loadingScreen.hidden`);
+  assert.equal(await run('(()=>{const img=document.querySelector("[data-ammo=fast] img");return img.complete&&img.naturalWidth>0})()'),true);await run('document.querySelector("[data-ammo=fast] img").decode()');assert.equal(errors.length,0);
+  console.log('PASS: deferred ammo icon failure gates its level, then retry decodes the icon before switching');
+
+  blockPattern='*player-renderer.js*';await send('Fetch.enable',{patterns:[{urlPattern:blockPattern,requestStage:'Request'}]});
   await send('Page.navigate',{url:process.argv[2]||'http://127.0.0.1:4180/'});await wait('window.demo');await wait('window.demo.assetsReady');
   assert.equal(await run('demo.playerMode'),'sprite');await enter();await run('new Promise(r=>setTimeout(r,1500))');
   assert.equal(await run('demo.playerMode'),'sprite');assert.equal(await run('loadingScreen.hidden'),true);assert.equal(errors.length,0);

@@ -5,7 +5,7 @@ const root = __dirname;
 const host = process.env.ONE_SHOT_HOST || '127.0.0.1';
 const port = Number(process.env.ONE_SHOT_PORT || 4180);
 const runtimeFiles = new Set(['index.html','style.css','casual.css','game.js','soundtrack.js','audio.js']);
-['player-bootstrap.js','player-model.js','player-renderer.js','garden-frame.js'].forEach(file=>runtimeFiles.add(file));
+['player-bootstrap.js','player-model.js','player-renderer.js','garden-frame.js','onboarding.js'].forEach(file=>runtimeFiles.add(file));
 ['index.html','lab.css','lab.js','vendor/three.module.js','vendor/three.core.js','vendor/LICENSE'].forEach(file=>runtimeFiles.add('3d-lab/'+file));
 const types = {'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.webp':'image/webp','.woff2':'font/woff2','.wav':'audio/wav'};
 http.createServer((req,res)=>{

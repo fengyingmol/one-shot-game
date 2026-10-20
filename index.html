@@ -3,7 +3,7 @@
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#fff0ce"><title>一发入魂 · 玩具小院</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="casual.css"></head>
 <body class="loading">
 
-<section id="loadingScreen" aria-label="加载游戏"><div class="loading-card"><div class="loading-mark" aria-hidden="true"><img src="assets/icons/bullseye.svg" alt=""></div><p class="loading-kicker">玩具小院 · 弹射挑战</p><h1>一发入魂</h1><p class="loading-subtitle">找准角度，让每一发都算数。</p><progress id="loadingProgress" max="12" value="0" aria-label="游戏素材加载进度"></progress><p id="loadingStatus" role="status">准备加载…</p><button id="loadingStart" hidden>点击进入游戏</button><button id="loadingRetry" hidden>重新加载</button><noscript>请开启浏览器 JavaScript 后重新打开游戏。</noscript></div></section>
+<section id="loadingScreen" aria-label="加载游戏"><div class="loading-card"><div class="loading-mark" aria-hidden="true"><img src="assets/icons/bullseye.svg" alt=""></div><p class="loading-kicker">玩具小院 · 弹射挑战</p><h1>一发入魂</h1><p class="loading-subtitle">找准角度，让每一发都算数。</p><progress id="loadingProgress" max="9" value="0" aria-label="游戏素材加载进度"></progress><p id="loadingStatus" role="status">准备加载…</p><button id="loadingStart" hidden>点击进入游戏</button><button id="loadingRetry" hidden>重新加载</button><noscript>请开启浏览器 JavaScript 后重新打开游戏。</noscript></div></section>
 <main inert>
  <header><a class="brand" href="./"><img class="title-art" data-asset="toy-title" alt="一发入魂"><span>玩具小院</span></a></header>
  <section class="intro"><p>找个角度，让这一枪多飞一会。</p></section>
@@ -24,6 +24,7 @@
   </aside>
   <aside id="settingsDialog" aria-label="设置" hidden><div class="menu-heading"><div><span class="menu-kicker">一发入魂</span><h2>设置</h2></div><button id="closeSettings" aria-label="关闭设置">返回游戏</button></div>
    <section id="audioPanel"><h3 class="panel-section-title">声音</h3><button id="sound" aria-pressed="true"><img class="icon" src="assets/icons/volume-up.svg" alt=""><span id="soundLabel">声音：开</span></button><p id="audioStatus" role="status">默认开启 · 点击进入后播放</p><div class="audio-toggles"><button id="musicToggle" aria-pressed="true">音乐：开</button><button id="sfxToggle" aria-pressed="true">音效：开</button></div><label class="audio-volume" for="audioVolume">音量<input id="audioVolume" type="range" min="0" max="100" value="75" aria-label="游戏总音量"></label></section>
+   <section class="guide-settings"><h3 class="panel-section-title">新手教学</h3><button id="replayGuide">重看本关教学</button><p>只讲新元素，不展示整关解法。</p></section>
   </aside>
  </section><footer>无体力 · 无倒计时 · 随时重来</footer>
-</main><script src="soundtrack.js"></script><script src="player-bootstrap.js"></script><script src="garden-frame.js"></script><script src="game.js"></script><script src="audio.js"></script></body></html>
+</main><script src="soundtrack.js"></script><script src="player-bootstrap.js"></script><script src="garden-frame.js"></script><script src="game.js"></script><script src="audio.js"></script><script src="onboarding.js"></script></body></html>

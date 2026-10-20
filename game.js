@@ -7,7 +7,7 @@
  const now=()=>typeof performance!=='undefined'?performance.now():Date.now();
  // Art changes presentation only; all collisions remain in the original flat room.
  const art={};
- const artFiles={courtyard:'toy-courtyard-lawn-v1',gardenDecor:'toy-garden-decor-v1',gardenSky:'garden-sky-v1',gardenGround:'garden-ground-whole-v1',player:'toy-player-poses',monster:'toy-bomb-satin-v1',normalMonster:'toy-normal-sculpt-v2',helmet:'toy-windup-cover-v1',helmetMonster:'toy-windup-armored-v1',helmetBare:'toy-windup-bare-v1',shield:'toy-shield-peek-v1',barrel:'toy-barrel',obstacle:'toy-wood-satin-v2',woodDamaged:'toy-wood-damaged-satin-v2',brick:'toy-limestone-v1',iron:'toy-basalt-v1'};
+ const artFiles={courtyard:'toy-courtyard-frame-v1',gardenDecor:'toy-garden-decor-small-v1',gardenSky:'garden-sky-v1',gardenGround:'garden-ground-whole-v1',player:'toy-player-poses',monster:'toy-bomb-satin-v1',normalMonster:'toy-normal-sculpt-v2',helmet:'toy-windup-cover-v1',helmetMonster:'toy-windup-armored-v1',helmetBare:'toy-windup-bare-v1',shield:'toy-shield-peek-v1',barrel:'toy-barrel',obstacle:'toy-wood-satin-v2',woodDamaged:'toy-wood-damaged-satin-v2',brick:'toy-limestone-v1',iron:'toy-basalt-v1'};
  let assetsReady=typeof Image==='undefined',allAssetsReady=assetsReady,initialReadyAt=assetsReady?now():0,gameEntered=assetsReady;
  let sceneImagesReady=assetsReady,sceneReady=assetsReady;
  let ensureLevelAssets=()=>Promise.resolve(true),showLevelLoading=()=>{};
@@ -15,9 +15,9 @@
  // Gate on first-level art and visible UI; defer art used only by later levels.
  function prepareAssets(){
   if(assetsReady)return;
-  const jobs=[...Object.entries(artFiles).map(([key,file])=>({key,img:art[key],file,done:false})),{key:'toy-normal-current',img:$('currentAmmoIcon'),file:'toy-normal',done:false},...Array.from(document.querySelectorAll('img[data-asset]'),img=>({key:img.dataset.asset,img,file:img.dataset.asset,done:false}))];
+  const jobs=[...Object.entries(artFiles).map(([key,file])=>({key,img:art[key],file,done:false})),{key:'toy-normal-current',img:$('currentAmmoIcon'),file:'toy-normal',done:false},...Array.from(document.querySelectorAll('.ammo-button img[data-asset]'),img=>({key:img.dataset.asset,img,file:img.dataset.asset,done:false}))];
   const byKey=new Map(jobs.map(job=>[job.key,job]));
-  const firstLevelKeys=['courtyard','gardenDecor','gardenSky','gardenGround','player','normalMonster','toy-title','toy-normal-current','toy-fast','toy-explosive','toy-scatter'];
+  const firstLevelKeys=['courtyard','gardenDecor','gardenSky','gardenGround','player','normalMonster','toy-normal-current'];
   const progress=$('loadingProgress'),status=$('loadingStatus'),retry=$('loadingRetry'),main=document.querySelector('main');
   let running=false,backgroundPromise=null,pendingLevel=null,loadRequest=0;
   const report=(queue,label='首关画面')=>{const done=queue.filter(job=>job.done).length;progress.max=queue.length;progress.value=done;status.textContent=`${label} ${done} / ${queue.length} · ${Math.round(done/queue.length*100)}%`;};
@@ -39,7 +39,8 @@
    }));return results.every(Boolean);
   }
   const requiredKeys=index=>{
-   const level=levels[index],keys=new Set(['courtyard','gardenDecor','gardenSky','gardenGround','player','normalMonster','toy-title','toy-normal-current']);
+   const level=levels[index],keys=new Set(['courtyard','gardenDecor','gardenSky','gardenGround','player','normalMonster','toy-normal-current']);
+   for(const type of Object.keys(level.ammo))keys.add('toy-'+type);
    for(const enemy of level.enemies){const type=enemy[2]||'normal';if(type==='bomb')keys.add('monster');if(type==='shield')keys.add('shield');if(type==='helmet'){keys.add('helmetMonster');keys.add('helmetBare');keys.add('helmet');}}
    for(const wall of level.walls){const type=wall.type||'iron';keys.add(type);if(type==='obstacle')keys.add('woodDamaged');}
    if(level.barrels.length)keys.add('barrel');return [...keys];
@@ -52,7 +53,9 @@
   showLevelLoading=(index,keep)=>{const keys=requiredKeys(index);if(keysReady(keys))return null;const request=++loadRequest;showPendingLevel(index,keep,request);return ensureLevelAssets(index).then(ok=>{if(request!==loadRequest)return false;if(ok){pendingLevel=null;main.inert=false;loadingScreen.hidden=true;load(index,keep);return true;}status.textContent='本关素材加载失败，请检查网络后重试。';retry.hidden=false;return false;});};
   async function runInitial(){
    if(running)return;running=true;retry.hidden=true;const queue=firstLevelKeys.map(key=>byKey.get(key));report(queue);
-   const ok=await loadJobs(queue,()=>report(queue));
+   const images=loadJobs(queue,()=>report(queue));
+   window.preloadPlayerModel?.();
+   const ok=await images;
    if(!ok){running=false;status.textContent=`首关还有 ${queue.filter(job=>!job.done).length} 个素材未加载成功，请检查网络后重试。`;retry.hidden=false;return;}
    sceneImagesReady=true;status.textContent='正在准备持枪小人…';progress.max=1;progress.value=0;
    await window.loadPlayerModel?.();
@@ -141,8 +144,15 @@
   {"name":"正式 · 转向接力","sub":"受击转90° · 穿甲 ×1 + 普通 ×3","room":{"width":520,"height":680},"ammo":{"fast":1,"normal":3},"enemies":[[95,360,"helmet"],[55,360],[355,360],[425,360],[435,100,"shield"]],"walls":[{"x":135,"y":315,"w":16,"h":95,"type":"obstacle"},{"x":180,"y":315,"w":16,"h":95,"type":"obstacle"},{"x":70,"y":470,"w":120,"h":16,"type":"iron"},{"x":330,"y":470,"w":120,"h":16,"type":"iron"}],"barrels":[],"rotors":[{"x":260,"y":350,"length":112,"thickness":12,"angle":-0.7853981633974483}],"lesson":"挡板受击后转90度，下一枪方向会变；观察两侧目标再选弹。","hint":"挡板受击后转90度，下一枪方向会变；观察两侧目标再选弹。"},
   {"name":"正式 · 满庭连响","sub":"炸弹怪串起全场 · 四弹种分工","room":{"width":600,"height":760},"ammo":{"fast":1,"explosive":1,"scatter":1,"normal":3},"enemies":[[100,460,"helmet"],[60,460],[415,445,"bomb"],[470,470,"shield"],[400,500,"helmet"],[365,430],[112,210],[88,150],[395,200],[450,200],[505,200]],"walls":[{"x":280,"y":18,"w":20,"h":300,"type":"iron"},{"x":18,"y":275,"w":262,"h":18,"type":"brick"},{"x":350,"y":300,"w":232,"h":18,"type":"brick"},{"x":180,"y":405,"w":16,"h":90,"type":"obstacle"},{"x":220,"y":405,"w":16,"h":90,"type":"obstacle"}],"barrels":[[460,380]],"rotors":[{"x":300,"y":450,"length":100,"thickness":12,"angle":-0.7853981633974483}],"lesson":"炸弹怪可以带动桶、炸开石门；不同弹种负责不同区域。","hint":"炸弹怪可以带动桶、炸开石门；不同弹种负责不同区域。"}
  );
+ // Consolidate repeated arenas in the player-facing campaign. Keep retired layouts
+ // as non-selectable regression fixtures so collision/teaching checks remain useful.
+ levels[14].name='内部回归 · 木门回声';
+ levels[18].name='内部回归 · 破墙分工';
+ Object.assign(levels[15],{name:'正式 · 木门护盔',sub:'木门两击、头盔两击 · 普通 ×5',lesson:'木门受损和头盔破损都会保留，安排开路与补刀的顺序。',hint:'先判断哪一枪负责开路，哪条回程能再次经过头盔。'});
+ Object.assign(levels[19],{name:'正式 · 破墙穿廊',sub:'穿甲开木门、爆炸开石门 · 普通 ×2 + 穿甲 ×1 + 爆炸 ×1',ammo:{fast:1,explosive:1,normal:2},barrels:[],lesson:'穿甲贯穿木门与头盔，爆炸处理另一庭的石门，再留弹补枪。',hint:'木门与石门需要不同工具；先观察目标与门的距离，再安排每种子弹。'});
+ levels[19].enemies[4]=[400,340,'shield'];
  levels.forEach(l=>{l.group=l.name.startsWith('正式 · ')?'formal':l.name.startsWith('效率测试 · ')?'test':'tutorial';l.number=++groupCounts[l.group];});
- function nextLevel(index){const group=levels[index].group;if(levels[index+1]?.group===group)return index+1;if(group==='tutorial'){const first=levels.findIndex(l=>l.group==='formal');if(first>=0)return first;}return index;}
+ function nextLevel(index){const group=levels[index].group;if(group!=='tutorial'){const next=levels.findIndex((l,i)=>i>index&&l.group===group);return next>=0?next:index;}if(levels[index+1]?.group===group)return index+1;const first=levels.findIndex(l=>l.group==='formal');return first>=0?first:index;}
  function configureRoom(index){recoilUntil=0;({width:W,height:H}=levels[index].room);origin.x=W/2;origin.y=H-84;bounds.right=W-18;bounds.bottom=H-18;$('gameLayout').style.setProperty?.('--stage-width',W+'px');syncCanvas();}
  const comparison={};
  const scoreRules={hit:10,comboStep:5,comboWindow:1,unusedAmmo:{normal:20,fast:30,explosive:40,scatter:50}};
@@ -536,7 +546,8 @@
  $('closeLevels').onclick=closeMenus;$('closeSettings').onclick=closeMenus;$('menuBackdrop').onclick=closeMenus;
  document.addEventListener('keydown',e=>{const selector=$('levelPanel').open?'#levelsDialog':!$('settingsDialog').hidden?'#settingsDialog':null;if(!selector)return;if(e.key==='Escape'){e.preventDefault();closeMenus();}if(e.key==='Tab'){const controls=Array.from(document.querySelectorAll(selector+' button,'+selector+' summary,'+selector+' input')).filter(el=>!el.disabled&&el.getClientRects().length),first=controls[0],last=controls[controls.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}});
 
- levels.forEach((l,i)=>{if(l.group==='tutorial')return;if(i===0||l.group!==levels[i-1].group){const title=document.createElement('h3');title.className='level-group-title';title.dataset.group=l.group;title.innerHTML=`<span>${levelGroups[l.group].name}</span><small>${groupCounts[l.group]} 关</small>`;$('levels').append(title);}const b=document.createElement('button');b.className='level-button';b.dataset.levelIndex=String(i);b.dataset.group=l.group;b.innerHTML=`<span class="number">${String(l.number).padStart(2,'0')}</span><span><strong>${l.name.split(' · ')[1]}</strong><small>${l.sub}</small></span>`;b.onclick=()=>{load(i);closeMenus();};$('levels').append(b);});
+ let visibleLevelGroup;
+ levels.forEach((l,i)=>{if(l.group==='tutorial')return;if(l.group!==visibleLevelGroup){visibleLevelGroup=l.group;const title=document.createElement('h3');title.className='level-group-title';title.dataset.group=l.group;title.innerHTML=`<span>${levelGroups[l.group].name}</span><small>${groupCounts[l.group]} 关</small>`;$('levels').append(title);}const b=document.createElement('button');b.className='level-button';b.dataset.levelIndex=String(i);b.dataset.group=l.group;b.innerHTML=`<span class="number">${String(l.number).padStart(2,'0')}</span><span><strong>${l.name.split(' · ')[1]}</strong><small>${l.sub}</small></span>`;b.onclick=()=>{load(i);closeMenus();};$('levels').append(b);});
  Object.entries(ammoTypes).forEach(([key,type])=>{const b=document.createElement('button');b.className='ammo-button';b.dataset.ammo=key;b.style.setProperty('--bullet-color',type.color);b.innerHTML=`<img class="ammo-icon" data-asset="toy-${key}" alt=""><span><strong>${{normal:'普通',fast:'穿甲',explosive:'爆炸',scatter:'散弹'}[key]}</strong><small>${type.sub}</small><b class="ammo-count" id="stock-${key}"></b></span>`;b.onclick=()=>selectAmmo(key);$('ammoChoices').append(b);});
  load(Math.max(0,levels.findIndex(l=>l.group==='formal')));let lastShotCount=stats.shots;function frame(time){let dt=Math.min(.032,(time-lastTime)/1000||.016);lastTime=time;if(lastShotCount!==stats.shots){lastShotCount=stats.shots;recoilUntil=state.time+.12;}if(slow>0){slow-=dt;dt*=.35;}update(dt);draw();requestAnimationFrame(frame);}requestAnimationFrame(frame);
  prepareAssets();

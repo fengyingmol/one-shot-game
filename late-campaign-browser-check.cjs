@@ -14,15 +14,14 @@ async function main(){
 
 
 
- const plans=[[["fast", -17.4], ["normal", 32], ["normal", 12]], [["fast", -18], ["scatter", 17], ["normal", 12]], [["normal", 0], ["fast", 0], ["normal", 15]], [["normal", 0], ["fast", 0], ["explosive", -20], ["normal", -22], ["scatter", 20]]],missAngles=[0,0,50,-36];
+ const plans=[[["fast", -17.4], ["explosive", 32], ["normal", 12]], [["fast", -18], ["scatter", 17], ["normal", 12]], [["normal", 0], ["fast", 0], ["normal", 15]], [["normal", 0], ["fast", 0], ["explosive", -20], ["normal", -22], ["scatter", 20]]],missAngles=[0,0,50,-36];
  async function choose(type){if(await run('demo.state.ammo')===type)return;await click('#ammoCurrent');await run('new Promise(r=>setTimeout(r,220))');await click('.ammo-button[data-ammo="'+type+'"]');assert.equal(await run('demo.state.ammo'),type);}
  async function shot(type,angle){await choose(type);const before=await run('demo.state.inventory["'+type+'"]');await fire(angle);assert.equal(await run('demo.state.inventory["'+type+'"]'),before-1);await run('new Promise(r=>setTimeout(r,20))');}
  try{
  await send('Runtime.enable');await send('Page.enable');await send('Page.navigate',{url:process.argv[2]||'http://127.0.0.1:4182/'});await wait('window.demo?.assetsReady');await click('#loadingStart');await wait('demo.gameEntered');await run('window.requestAnimationFrame=()=>0;new Promise(r=>setTimeout(r,80))');
- assert.equal(await run('document.querySelectorAll(".level-button").length'),15);assert.equal(await run('document.querySelectorAll(".level-button[data-group=formal]").length'),12);assert.equal(await run('document.querySelectorAll(".level-button[data-group=tutorial]").length'),0);
+ assert.equal(await run('document.querySelectorAll(".level-button").length'),13);assert.equal(await run('document.querySelectorAll(".level-button[data-group=formal]").length'),10);assert.equal(await run('document.querySelectorAll(".level-button[data-group=tutorial]").length'),0);
  for(const [width,height]of [[390,844],[320,568]]){
- await send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:2,mobile:true});await click('#openLevels');await click('.level-button[data-level-index="18"]');
- for(const [type,a]of [['explosive',-28],['normal',-17.4],['normal',-17.4],['normal',32],['normal',12]])await shot(type,a);await click('#resultAction');assert.equal(await run('demo.state.index'),19);
+ await send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:2,mobile:true});await click('#openLevels');await click('.level-button[data-level-index="19"]');await wait('demo.state.index===19&&loadingScreen.hidden');assert.equal(await run('demo.levels[demo.state.index].number'),7);
  for(let n=0;n<4;n++){
  const index=19+n;assert.equal(await run('demo.state.index'),index);assert.equal(await run('document.querySelector(".level-button.active").dataset.levelIndex'),String(index));await run('new Promise(r=>setTimeout(r,80));demo.render()');
  assert.ok(await run('(()=>{const r=game.getBoundingClientRect();return Math.abs(r.width/r.height-demo.stage.W/demo.stage.H)<.001&&r.top>=64&&r.bottom<=innerHeight-92&&document.documentElement.scrollWidth<=innerWidth})()'));await screenshot('demo-late-level-'+(9+n)+'-'+width+'.png');
@@ -39,7 +38,7 @@ async function main(){
  }
  await click('#openLevels');await run('comparison.scrollIntoView({block:"end"});scrollTo(0,0)');assert.ok(await run('comparisonRows.textContent.includes("★★★")'));await screenshot('demo-late-records-'+width+'.png');await click('#closeLevels');
  }
- assert.equal(errors.length,0);console.log('PASS: 390/320 real pointer 08→09→12, all ammo selection, piercing wood/helmets, scatter group plus shield, persistent rotor turns/reset, bomb→barrel→stone chain, 3 stars with spare ammo, per-level records and no tutorials/overflow/runtime errors');
+ assert.equal(errors.length,0);console.log('PASS: 390/320 real pointer merged 07→10, all ammo selection, piercing wood/helmets, scatter group plus shield, persistent rotor turns/reset, bomb→barrel→stone chain, 3 stars with spare ammo, per-level records and no tutorials/overflow/runtime errors');
  }finally{await send('Page.reload');ws.close()}
 }
 main().catch(e=>{console.error(e);process.exitCode=1});
