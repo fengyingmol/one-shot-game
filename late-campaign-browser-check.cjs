@@ -19,7 +19,7 @@ async function main(){
  async function shot(type,angle){await choose(type);const before=await run('demo.state.inventory["'+type+'"]');await fire(angle);assert.equal(await run('demo.state.inventory["'+type+'"]'),before-1);await run('new Promise(r=>setTimeout(r,20))');}
  try{
  await send('Runtime.enable');await send('Page.enable');await send('Page.navigate',{url:process.argv[2]||'http://127.0.0.1:4182/'});await wait('window.demo?.assetsReady');await click('#loadingStart');await wait('demo.gameEntered');await run('window.requestAnimationFrame=()=>0;new Promise(r=>setTimeout(r,80))');
- assert.equal(await run('document.querySelectorAll(".level-button").length'),13);assert.equal(await run('document.querySelectorAll(".level-button[data-group=formal]").length'),10);assert.equal(await run('document.querySelectorAll(".level-button[data-group=tutorial]").length'),0);
+ assert.equal(await run('document.querySelectorAll(".level-button").length'),24);assert.equal(await run('document.querySelectorAll(".level-button[data-group=formal]").length'),18);assert.equal(await run('document.querySelectorAll(".level-button[data-group=tutorial]").length'),0);
  for(const [width,height]of [[390,844],[320,568]]){
  await send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:2,mobile:true});await click('#openLevels');await click('.level-button[data-level-index="19"]');await wait('demo.state.index===19&&loadingScreen.hidden');assert.equal(await run('demo.levels[demo.state.index].number'),7);
  for(let n=0;n<4;n++){
@@ -34,7 +34,7 @@ async function main(){
  if(n===3&&k===0)assert.ok(await run('demo.state.bombExplosions===1&&demo.state.barrelExplosions===1&&!demo.state.walls[2].alive'));
  if(n===3&&k===2)assert.ok(await run('!demo.state.walls[1].alive&&demo.state.walls.filter(w=>w.type==="obstacle").every(w=>!w.alive)'));
  }
- assert.equal(await run('demo.state.phase'),'result');assert.equal(await run('demo.state.stars'),3);assert.equal(await run('demo.state.inventory.normal'),1);assert.equal(await run('demo.state.kills===demo.state.enemies.length'),true);await run('demo.render()');await screenshot('demo-late-clear-'+(9+n)+'-'+width+'.png');await click('#resultAction');assert.equal(await run('demo.state.index'),n<3?index+1:index);
+ assert.equal(await run('demo.state.phase'),'result');assert.equal(await run('demo.state.stars'),3);assert.equal(await run('demo.state.inventory.normal'),1);assert.equal(await run('demo.state.kills===demo.state.enemies.length'),true);await run('demo.render()');await screenshot('demo-late-clear-'+(9+n)+'-'+width+'.png');await click('#resultAction');await wait(`demo.state.index===${index+1}&&loadingScreen.hidden`);assert.equal(await run('demo.state.index'),index+1);
  }
  await click('#openLevels');await run('comparison.scrollIntoView({block:"end"});scrollTo(0,0)');assert.ok(await run('comparisonRows.textContent.includes("★★★")'));await screenshot('demo-late-records-'+width+'.png');await click('#closeLevels');
  }

@@ -3,8 +3,8 @@ function createEngine(){const elements=new Map(),buttons=[];const get=id=>{if(!e
 
 const {demo:d,get}=createEngine(),indices=d.levels.map((l,i)=>l.group==='formal'?i:-1).filter(i=>i>=0);
 const plans=[[["normal", -18], ["normal", -18], ["normal", -18], ["normal", 50]], [["normal", -19.5], ["normal", -19.5], ["normal", 21]], [["normal", 12], ["normal", 12], ["normal", -9], ["normal", 27]], [["fast", -17.4], ["explosive", 32], ["normal", 12]]];
-assert.deepEqual(Array.from(indices),[11,12,13,15,16,17,19,20,21,22]);
-assert.equal(d.levels.length,26);assert.equal(d.levels.filter(l=>l.group==='tutorial').length,13);assert.equal(d.levels.filter(l=>l.group==='test').length,3);
+assert.deepEqual(Array.from(indices),[11,12,13,15,16,17,19,20,21,22,23,24,25,26,33,34,35,36]);
+assert.equal(d.levels.length,37);assert.equal(d.levels.filter(l=>l.group==='tutorial').length,13);assert.equal(d.levels.filter(l=>l.group==='test').length,6);
 function fire(type,a,dt=.008){assert.equal(d.state.phase,'aim');assert.equal(d.selectAmmo(type),true);const o=d.stage.origin,r=a*Math.PI/180;d.shootAt(o.x+Math.sin(r)*400,o.y-Math.cos(r)*400);for(let n=0;n<2500&&['flying','settling'].includes(d.state.phase);n++)d.step(dt);}
 function solve(index,plan,dt=.008){d.load(index);for(const [type,a]of plan){if(d.state.phase!=='aim')break;fire(type,a,dt)}return d.state.kills===d.state.enemies.length;}
 function longest(values){let best=0,start=null,previous=null;for(const a of values){if(previous===null||Math.abs(a-previous-.5)>1e-8)start=a;best=Math.max(best,a-start);previous=a}return best;}
@@ -20,4 +20,4 @@ for(let n=0;n<plans.length;n++){
  report.push({number:n+4,name:level.name,budget,shots:plan.length,scores,windows});
 }
 assert.equal(d.levels[14].group,'tutorial');assert.equal(d.levels[18].group,'tutorial');assert.ok(d.levels[15].walls.some(w=>w.type==='obstacle'));assert.equal(d.levels[15].enemies.filter(e=>e[2]==='helmet').length,2);assert.equal(d.levels[16].barrels.length,2);assert.equal(d.levels[17].enemies.filter(e=>e[2]==='shield').length,2);assert.equal(d.levels[19].ammo.explosive,1);assert.equal(d.levels[19].ammo.fast,1);assert.equal(d.levels[19].barrels.length,0);
-console.log(JSON.stringify({checks:'PASS: 26-layout order, actual allocations, 8/16/32ms three-star references and spare-shot recovery, no straight / one-shot collapse, per-level records, retry and formal-only progression',report},null,2));
+console.log(JSON.stringify({checks:'PASS: 33-layout order, actual allocations, 8/16/32ms three-star references and spare-shot recovery, no straight / one-shot collapse, per-level records, retry and formal-only progression',report},null,2));

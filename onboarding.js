@@ -17,9 +17,12 @@
   explosive:{title:'石门要用爆炸打开',text:'换成爆炸弹：爆炸能破坏浅色石墙，也能绕过盾牌。引爆后子弹消失。'},
   scatter:{title:'瞄准一片区域',text:'散弹近处集中、远处散开。瞄准怪群中间，不必逐只直射。'},
   rotor:{title:'为下一枪铺路',text:'子弹先反弹，机关再转90°。下一枪可以利用新的方向。'},
-  bomb:{title:'小怪也是连锁起点',text:'红色炸弹怪被击倒后会爆炸，看看它附近还有谁。'}
+  bomb:{title:'小怪也是连锁起点',text:'红色炸弹怪被击倒后会爆炸，看看它附近还有谁。'},
+  challenge:{title:'顺手玩个小挑战',text:'彩旗瓶子不挡子弹。一枪击倒三只可加分，不做挑战也能正常过关。'},
+  mover:{title:'观察空隙再出手',text:'滑轨上的加固挡板会往返移动，不能打碎。瞄准线只显示它现在的位置。'},
+  lever:{title:'射击拉杆打开木闸',text:'红球拉杆控制连杆另一端的木闸，同枪只拨一次；门的状态保留到下一枪。'}
  };
- function lessonIds(level){if(level.group!=='formal')return [];return ({1:['drag','bounce'],3:['indirect'],4:['wood','helmet'],5:['barrel'],6:['shield'],7:['piercing','explosive'],8:['scatter'],9:['rotor'],10:['bomb']})[level.number]||[];}
+ function lessonIds(level){if(level.group!=='formal')return [];return ({1:['drag','bounce'],3:['indirect'],4:['wood','helmet'],5:['barrel'],6:['shield'],7:['piercing','explosive'],8:['scatter'],9:['rotor'],10:['bomb'],15:['challenge'],16:['mover'],17:['lever']})[level.number]||[];}
  const root=document.createElement('div');root.id='gameGuide';root.hidden=true;
  root.innerHTML='<svg class="guide-scene" aria-hidden="true"><defs><mask id="guideSpotlight" maskUnits="userSpaceOnUse"><rect class="guide-mask-base" fill="white"/><circle class="guide-hole" fill="black"/></mask></defs><rect class="guide-dim" fill="#162a26" fill-opacity=".2" mask="url(#guideSpotlight)"/><circle class="guide-focus" fill="none" stroke="#ffe8a4"/><path class="guide-path-under" fill="none" stroke="#4b3b37"/><path class="guide-path" fill="none" stroke="#fff7d4"/><g class="guide-hand"><circle r="16" fill="#fff5d2" fill-opacity=".25"/><path d="M-3 14 C-9 9 -13 5 -11 2 C-9 -1 -6 2 -3 4 L-3 -13 C-3 -18 3 -18 3 -13 L3 -3 C8 -7 12 -3 12 1 L12 10 C12 18 6 21 1 20 Z" fill="#fff9eb" stroke="#76502f" stroke-width="2" stroke-linejoin="round"/></g></svg><div class="guide-card" role="status" aria-live="polite"><small class="guide-kicker"></small><strong class="guide-title"></strong><p class="guide-copy"></p><span>示意轨迹，不是完整解法 · 开始瞄准即收起</span></div>';
  root.querySelector('.guide-card>span').textContent='局部示意 · 开始瞄准即收起';
@@ -75,7 +78,11 @@
   const enemy=type=>s.enemies.find(e=>e.alive&&e.type===type)||s.enemies.find(e=>e.type===type),wall=type=>s.walls.find(w=>w.alive&&w.type===type)||s.walls.find(w=>w.type===type);
   let target,points;
   if(['drag','bounce','indirect'].includes(kind))return ricochetLesson(kind);
-  else if(['wood','piercing','explosive'].includes(kind)){
+  else if(['challenge','mover','lever'].includes(kind)){
+   const p=kind==='challenge'?s.props.find(p=>p.challenge&&!p.down):kind==='mover'?s.movers[0]:s.switches[0];if(!p)return null;
+   target={x:p.x+(kind==='mover'?p.w/2:0),y:p.y+(kind==='mover'?p.h/2:0),r:kind==='mover'?p.w/2+8:28};
+   points=[[target.x-25,target.y+70],[target.x,target.y+12]];
+  }else if(['wood','piercing','explosive'].includes(kind)){
    const w=wall(kind==='explosive'?'brick':'obstacle');if(!w)return null;target={x:w.x+w.w*.62,y:w.y+w.h/2,r:32};points=[[target.x-22,target.y+82],[target.x,target.y+5]];
    if(kind==='wood')points.push([target.x+22,target.y+82]);if(kind==='piercing')points.push([target.x+22,target.y-70]);
   }else if(kind==='rotor'){
@@ -111,7 +118,7 @@
  function frame(time){
   requestAnimationFrame(frame);if(time-lastTick<32)return;lastTick=time;const dt=Math.min(.1,(time-lastTime)/1000||0);lastTime=time;
   if(demo.state!==stateRef)resetForLevel();
-  const paused=!demo.gameEntered||!document.getElementById('loadingScreen').hidden||document.hidden||document.getElementById('levelPanel').open||!document.getElementById('settingsDialog').hidden||!document.getElementById('ammoPicker').hidden;
+  const paused=!demo.gameEntered||!document.getElementById('loadingScreen').hidden||document.hidden||document.getElementById('levelPanel').open||!document.getElementById('settingsDialog').hidden||!document.getElementById('ammoPicker').hidden||document.getElementById('challengePanel').open;
   if(paused||demo.state.phase!=='aim'){root.hidden=true;return;}
   if(waitForShot!==null){if(demo.state.shotsUsed<=waitForShot)return;waitForShot=null;}
   if(!active)begin();if(!active){root.hidden=true;return;}elapsed+=dt;if(elapsed>6.5&&queue.length){active=null;begin();}paint();

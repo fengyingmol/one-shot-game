@@ -38,7 +38,7 @@ async function main(){
     if(second){await wait(`gameGuide.active==="${second}"`);await screenshot(`demo-guide-${second}-${width}.png`);assert.equal(await snapshot(),before);}
     await click('#retry');await delay(100);assert.equal(await run('gameGuideRootHidden()'),true);
    }
-   for(const index of [12,23,24,25]){await run(`demo.load(${index})`);await wait(`demo.state.index===${index}&&loadingScreen.hidden`);await delay(100);assert.equal(await run('gameGuideRootHidden()'),true);await click('#openSettings');assert.equal(await run('replayGuide.disabled'),true);await click('#closeSettings');}
+   for(const index of [12,23,24,25,26,27,28,29,30,31,32]){await run(`demo.load(${index})`);await wait(`demo.state.index===${index}&&loadingScreen.hidden`);await delay(100);assert.equal(await run('gameGuideRootHidden()'),true);await click('#openSettings');assert.equal(await run('replayGuide.disabled'),true);await click('#closeSettings');}
   }
   await run('demo.load(15)');await wait('demo.state.index===15&&loadingScreen.hidden');await replay();
   // After a real first shot the second concept is shown; there is no forced angle.

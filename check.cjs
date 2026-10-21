@@ -3,7 +3,8 @@ const elements=new Map(),buttons=[];
 const get=id=>{if(!elements.has(id))elements.set(id,{value:'800',style:{},classList:{toggle(){}},addEventListener(){},append(b){buttons.push(b);},setAttribute(){},getContext(){return {};}});return elements.get(id);};
 const sandbox={window:{},document:{getElementById:get,querySelectorAll(s){return buttons.filter(b=>'.'+b.className===s);},addEventListener(){},createElement(){return {dataset:{},style:{setProperty(){}},setAttribute(){},classList:{toggle(){}}};}},requestAnimationFrame(){},Math,console};
 vm.runInNewContext(fs.readFileSync('game.js','utf8'),sandbox);
-const demo=sandbox.window.demo,{origin,bounds}=demo.stage,W=600,H=900,CH=demo.levels.length-1;
+const demo=sandbox.window.demo,{origin,bounds}=demo.stage,W=600,H=900,CH=demo.levels.findIndex(l=>l.name==='效率测试 · 四区回廊');
+const playedEffects=[];sandbox.window.gameAudio={play:(name,pitch)=>playedEffects.push({name,pitch})};
 const unreachable=()=>[{id:99,x:W+100,y:H+100,r:18,type:'normal',alive:true}];
 const enemy=(x,y,type='normal',id=0)=>({id,x,y,r:type==='shield'?23:18,type,alive:true});
 const run=()=>{let frames=0;while(demo.state.phase==='flying'&&frames++<1200)demo.step(.008);assert.ok(frames<1200,'Shot must terminate');demo.step(1);assert.equal(demo.state.phase,'result');};
@@ -54,7 +55,8 @@ b=targetRoom();demo.state.enemies.push(enemy(origin.x,by,'bomb'),enemy(origin.x+
 demo.load(CH);assert.equal(demo.state.enemies.filter(e=>e.type==='helmet'&&e.hp===2).length,4);assert.equal(demo.state.enemies.filter(e=>e.type==='bomb').length,4);assert.equal(demo.state.helmets.length,0);assert.equal(demo.state.bombExplosions,0);
 console.log('PASS: helmet first pass, no reflection/recharge, re-entry and independent pellet kills, helmet animation, direct explosive kill, small bomb radius, larger barrel radius, mixed chain without double kills, reset');
 
-b=targetRoom();for(let id=0;id<3;id++){demo.state.enemies.push(enemy(b.x,b.y-10,'normal',id));demo.step(.004);}assert.equal(demo.state.score,45);assert.equal(demo.state.baseScore,30);assert.equal(demo.state.comboBonus,15);assert.equal(demo.state.maxCombo,3);assert.equal(demo.state.hitCount,3);assert.equal(get('scoreHud').textContent,'得分 45');
+b=targetRoom();playedEffects.length=0;for(let id=0;id<3;id++){demo.state.enemies.push(enemy(b.x,b.y-10,'normal',id));demo.step(.004);if(id<2)assert.equal(playedEffects.filter(effect=>effect.name==='cheer').length,0);}assert.equal(demo.state.score,45);assert.equal(demo.state.baseScore,30);assert.equal(demo.state.comboBonus,15);assert.equal(demo.state.maxCombo,3);assert.equal(demo.state.hitCount,3);assert.equal(get('scoreHud').textContent,'得分 45');assert.deepEqual(playedEffects.filter(effect=>effect.name==='cheer').map(effect=>effect.pitch),[1]);
+playedEffects.length=0;b=targetRoom();playedEffects.length=0;for(let id=0;id<6;id++)demo.state.enemies.push(enemy(b.x,b.y-10,'normal',id));for(let id=0;id<6;id++)demo.step(.004);assert.deepEqual(playedEffects.filter(effect=>effect.name==='cheer').map(effect=>effect.pitch),[1,1.12],'Cheer at 3-hit and 6-hit combo milestones');
 const scored=demo.state.score;demo.step(.01);assert.equal(demo.state.score,scored,'Dead targets and continued overlap cannot rescore');
 b=targetRoom();demo.state.enemies.push(enemy(b.x,b.y-10));demo.step(.004);demo.step(1.01);assert.equal(demo.state.comboCount,0);demo.state.enemies.push(enemy(b.x,b.y-10,'normal',1));demo.step(.004);assert.equal(demo.state.score,20,'Expired combo restarts without bonus');assert.equal(demo.state.maxCombo,1);
 b=targetRoom();h=helmetTarget(b.x,b.y-100);demo.state.enemies.push(h);demo.step(.16);assert.equal(demo.state.score,10);assert.equal(demo.state.kills,0);demo.step(.01);assert.equal(demo.state.score,10);b.y=h.y+30;demo.step(.02);assert.equal(demo.state.score,25);assert.equal(demo.state.hitCount,2);assert.equal(demo.state.maxCombo,2);
@@ -126,3 +128,9 @@ require('./early-campaign-check.cjs');
 require('./campaign-extension-check.cjs');
 
 require('./late-campaign-check.cjs');
+require('./advanced-campaign-check.cjs');
+require('./moving-bumper-check.cjs');
+require('./clockwork-check.cjs');
+require('./props-check.cjs');
+require('./garden-campaign-check.cjs');
+require('./combo-feedback-check.cjs');

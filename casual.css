@@ -343,6 +343,22 @@ button:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visi
 #gardenLeaves{filter:saturate(.9) contrast(.94) brightness(.98)}
 .arena-top #levelName,.arena-stats,#retry,#openSettings,#openLevels,.trajectory-button,.ammo-current{filter:saturate(.8) contrast(.96) brightness(.98)}
 /* Teaching layer follows the contained board, never changes layout or captures input. */
+.combo-feedback{position:fixed;left:12px;top:calc(120px + env(safe-area-inset-top));z-index:5;box-sizing:border-box;display:flex;align-items:baseline;justify-content:center;gap:5px;width:108px;padding:6px 9px;pointer-events:none;user-select:none;color:#805020;background:#fff3cde8;border:2px solid #ecc568;border-radius:17px;box-shadow:0 3px 0 #b28b4940,0 4px 12px #55441b14;text-shadow:0 1px 0 #fff8e6}
+.combo-feedback[hidden]{display:none!important}
+.combo-feedback strong{font-size:30px;line-height:1.1;font-weight:900;font-variant-numeric:tabular-nums}
+.combo-feedback span{font-size:14px;font-weight:800;white-space:nowrap}
+.combo-feedback[data-tier="big"]{color:#8d4d1c;background:#ffe6a8ed;border-color:#e2a83e}
+.challenge-panel{position:fixed;right:12px;top:calc(70px + env(safe-area-inset-top));z-index:6;width:178px;max-width:calc(100vw - 28px);background:transparent!important;border:0!important;box-shadow:none!important;color:#344d3a;text-shadow:0 1px 2px #fff9e9,1px 0 2px #fff9e9,-1px 0 2px #fff9e9}
+.challenge-panel[hidden]{display:none!important}
+.challenge-panel summary{display:flex;align-items:center;justify-content:flex-end;gap:5px;min-height:44px;padding:0;cursor:pointer;list-style:none;font-size:12px;font-weight:800;background:transparent;border:0;user-select:none;-webkit-tap-highlight-color:transparent}
+.challenge-panel summary::-webkit-details-marker{display:none}
+.challenge-panel summary svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 1px 1px #fff9e9)}
+.challenge-chevron{font-size:16px;line-height:1;transition:transform .15s}
+.challenge-panel[open] .challenge-chevron{transform:rotate(180deg)}
+.challenge-copy{text-align:right;padding:0 0 7px;pointer-events:none}
+.challenge-copy strong{font-size:13px}.challenge-copy p{margin:5px 0;font-size:12px;line-height:1.5}.challenge-copy>span{font-size:11px;color:#63502a;font-weight:700}
+.challenge-panel summary:focus-visible{outline:2px solid #8a6237;outline-offset:2px;border-radius:5px}
+@media(prefers-reduced-motion:reduce){.challenge-chevron{transition:none}}
 #gameGuide{position:fixed;inset:0;z-index:4;pointer-events:none;overflow:hidden}
 #gameGuide[hidden]{display:none}
 #gameGuide .guide-scene{position:absolute;overflow:hidden}

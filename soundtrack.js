@@ -32,9 +32,11 @@
   crack:{duration:.12,tones:[[185,100,.08,.15,'sine',0]],noise:.32},
   break:{duration:.26,tones:[[240,100,.17,.22,'sine',0]],noise:.36},
   explosion:{duration:.40,tones:[[135,40,.35,.65,'sine',0],[70,32,.3,.25,'sine',0]],noise:.43},
+  cheer:{duration:.40,tones:[[784,784,.16,.22,'sine',0],[1047,1047,.18,.18,'sine',.10],[1319,1319,.16,.08,'sine',.20]]},
   win:{duration:.95,tones:[[523,523,.19,.32,'sine',0],[659,659,.19,.32,'sine',.14],[784,784,.24,.32,'sine',.28],[1047,1047,.45,.25,'sine',.46]]},
   lose:{duration:.62,tones:[[392,392,.20,.25,'sine',0],[330,330,.20,.22,'sine',.17],[262,262,.24,.20,'sine',.34]]}
  };
+ // Gentle bell fallback if the short voice clips are unavailable.
  function effect(name,rate=22050,pitch=1){const spec=effects[name]||effects.ui,data=new Float32Array(Math.ceil(spec.duration*rate));for(const [f,end,d,amp,type,start] of spec.tones){const offset=Math.round(start*rate);let phase=0;for(let i=0;i<Math.ceil(d*rate)&&offset+i<data.length;i++){const t=i/rate,u=t/d;phase+=2*Math.PI*(f*Math.pow(end/f,u))*pitch/rate;const wave=type==='triangle'?Math.asin(Math.sin(phase))*2/Math.PI:Math.sin(phase);data[offset+i]+=wave*amp*Math.min(1,t/.005)*Math.pow(1-u,2);}}
   if(spec.noise){let seed=9381,previous=0;for(let i=0;i<data.length;i++){seed=(Math.imul(seed,1664525)+1013904223)>>>0;previous=previous*.65+(seed/4294967296*2-1)*.35;const t=i/data.length;data[i]+=previous*spec.noise*Math.min(1,i/(rate*.003))*Math.pow(1-t,3);}}
   return {rate,duration:data.length/rate,left:data,right:data};
